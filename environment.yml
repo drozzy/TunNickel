@@ -1,0 +1,23 @@
+name: surgical
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - ipywidgets
+  - altair 
+  - vega_datasets
+  - python=3.8
+  - numpy
+  - jupyter
+  - jupyterlab
+  - h5py
+  - matplotlib
+  - pydantic
+  - pip
+  - pytest
+  - scikit-learn
+  - torchvision 
+  - torchaudio
+  - pip:    
+    - tqdm
