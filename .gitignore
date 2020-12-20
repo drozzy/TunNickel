@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 
-JIGSAWS-Dataset
+src/dataset
 .vscode/settings.json
