@@ -75,7 +75,7 @@ class JigsawsDataset(Dataset):
         e = self.data[index]
         fname = e['fname']
         from_line, to_line = e['from_line'], e['to_line']
-        return self.task_data[fname][from_line:to_line]
+        return {'segment' : self.task_data[fname][from_line:to_line]}
 
     def __len__(self):
         return len(self.data)
@@ -88,8 +88,8 @@ ds = JigsawsDataset(train_txt, task)
 
 fname = 'Knot_Tying_I002.txt'
 tpath = trial_path(task, fname)
-ds[0].shape
+ds[0]['segment'].shape
 
 # %%
-ds[1].shape
+ds[1]['segment'].shape
 # %%
