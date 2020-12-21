@@ -11,12 +11,12 @@ dependencies:
   - numpy
   - jupyter
   - jupyterlab
-  - h5py
   - matplotlib
   - pydantic
   - pip
   - pytest
   - scikit-learn
+  - pytorch
   - torchvision 
   - torchaudio
   - pip:    
