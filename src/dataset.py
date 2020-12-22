@@ -1,63 +1,90 @@
 # %%
+from genericpath import exists
 import torch
 import os
 from torch.utils.data import Dataset, DataLoader
 from numpy import genfromtxt
 import numpy as np
-# %%
 
-def parse_line(line):
-    spec, label = line.split()
-    n1,n2,n3,p1,p2 = spec.split("_")
-    p2,_ = p2.split(".")
-
-    fname = f"{n1}_{n2}_{n3}.txt"
-    return fname, int(p1)-1, int(p2)-1
-
-def parse_file(fname):
-    data = []
-    for line in open(fname):
-        fname, from_line, to_line = parse_line(line)
-        data.append({'fname': fname, 
-            'from_line': from_line, 
-            'to_line': to_line})
-    return data
-
-
-# %%
-def trial_dir(task):
-    return os.path.join(datasetdir, task, "kinematics", "AllGestures")
-
-def trial_path(task, fname):
-    trialdir = os.path.join(datasetdir, task, "kinematics", "AllGestures")
-    return os.path.join(trialdir, fname)
-# %%
-
-
+# %% Task Data - read all of it into memory
 def cache_task_data(task):
-    for fname in os.listdir(os.path.join(datasetdir, task, "kinematics", "AllGestures")):
-        d = genfromtxt(trial_path(task, fname))
-        trial_data[fname] = d
-        oname = os.path.join("cached", task, f"{fname}.npy")
-        np.save(oname, d)
-
+    for fname in os.listdir(f"dataset/{task}/kinematics/AllGestures"):
+        data = genfromtxt(f"dataset/{task}/kinematics/AllGestures/{fname}")
+        to = f"cached/{task}/{fname}.npy"
+        np.save(to, data)
 
 def read_cached(task):
-    trial_data = {}
+    data = {}
     for fname in os.listdir(f"cached/{task}"):
-        d = np.load(os.path.join(f"cached/{task}", fname))
+        d = np.load(f"cached/{task}/{fname}")
         trial_name, _ = fname.split(".npy") 
-        trial_data[trial_name] = d
-    return trial_data
+        data[trial_name] = d
+    return data
         
-
 def read_task_data(task):
     if not os.path.exists(f"cached/{task}"):
         os.makedirs(f"cached/{task}", exist_ok=True)
         cache_task_data(task)
     return read_cached(task)
 
-read_task_data("Knot_Tying");#.keys()
+def read_data():
+    data = {}
+    for task in os.listdir("dataset/Experimental_Setup"):
+        data[task] = read_task_data(task)
+    return data
+
+task_data = read_data()
+
+# %% Experimental Setup data
+def parse_line(line, task):
+    spec, label = line.split()
+    # print(spec)
+    trial, from_line, to_line_txt = spec.split(f"{task}_")[1].split("_")
+    to_line,_ = to_line_txt.split(".")
+
+    gesture = f"{trial}_{from_line}_{to_line}.txt"
+    return gesture, int(from_line)-1, int(to_line)-1, label
+
+def parse_file(fname, task):    
+    data = []
+    for line in open(fname):
+        gesture, from_line, to_line, label = parse_line(line, task)
+        data.append({'gesture': gesture, 
+            'from_line': from_line, 
+            'to_line': to_line,
+            'label': label})
+    return data
+
+def read_itr(task, user_out, itr):
+    modes = {}
+    # for m in ['Train', 'Test']:
+    for mode in os.listdir(f"dataset/Experimental_setup/{task}/Balanced/GestureClassification/UserOut/{user_out}/{itr}"):
+        fname = f"dataset/Experimental_setup/{task}/Balanced/GestureClassification/UserOut/{user_out}/{itr}/{mode}"
+        modes[mode] = parse_file(fname, task)
+    return modes
+
+def read_user_out(task, user_out):
+    itrs = {}
+    for itr in os.listdir(f"dataset/Experimental_setup/{task}/Balanced/GestureClassification/UserOut/{user_out}"):
+        itrs[itr] = read_itr(task, user_out, itr)
+    return itrs
+
+def read_exp_task(task):
+    user_outs = {}
+    for user_out in os.listdir(f"dataset/Experimental_setup/{task}/Balanced/GestureClassification/UserOut"):
+        user_outs[user_out] = read_user_out(task, user_out)
+    return user_outs
+
+def read_experimental_setup():
+    exp_tasks = {}
+    for task in os.listdir("dataset/Experimental_Setup"):
+        exp_tasks[task] = read_exp_task(task)
+    return exp_tasks
+    
+# tasks, tasks_setup = experimental_setup()
+exp_tasks = read_experimental_setup()
+# %%
+
 # %%
 class JigsawsDataset(Dataset):
     """
