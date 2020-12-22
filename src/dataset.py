@@ -42,14 +42,14 @@ def parse_line(line, task):
     trial, from_line, to_line_txt = spec.split(f"{task}_")[1].split("_")
     to_line,_ = to_line_txt.split(".")
 
-    gesture = f"{trial}_{from_line}_{to_line}.txt"
-    return gesture, int(from_line)-1, int(to_line)-1, label
+    # trial_fname = f"{task}_{trial}.txt"
+    return trial, int(from_line)-1, int(to_line)-1, label
 
 def parse_file(fname, task):    
     data = []
     for line in open(fname):
-        gesture, from_line, to_line, label = parse_line(line, task)
-        data.append({'gesture': gesture, 
+        trial, from_line, to_line, label = parse_line(line, task)
+        data.append({'trial': trial, 
             'from_line': from_line, 
             'to_line': to_line,
             'label': label})
@@ -80,43 +80,49 @@ def read_experimental_setup():
     for task in os.listdir("dataset/Experimental_Setup"):
         exp_tasks[task] = read_exp_task(task)
     return exp_tasks
-    
+# %%
 # tasks, tasks_setup = experimental_setup()
-exp_tasks = read_experimental_setup()
+exp_setup = read_experimental_setup()
+# %%
+
 # %%
 
 # %%
 class JigsawsDataset(Dataset):
-    """
-    fname - Experiment setup filename. e.g.:
-        "dataset/Experimental_setup/Knot_Tying/Balanced/GestureClassification/UserOut/1_Out/itr_1/Train.txt"
-    task - Task, e.g. "Knot_Tying"
-    """
-    def __init__(self, fname, task):
-        self.fname = fname
+    def __init__(self, task="Knot_Tying", user_out="1_Out", itr="itr_1", train=True):        
         self.task = task
-        self.task_data = read_task_data(task)
-        self.data = parse_file(fname)
+        self.user_out = user_out
+        self.itr = itr
+        if train:
+            self.mode = 'Train.txt'
+        else:
+            self.mode = 'Test.txt'
+
+        self.task_data = read_data()
+        self.experimental_setup = read_experimental_setup()
 
     def __getitem__(self, index):
-        e = self.data[index]
-        fname = e['fname']
+        e = self.task_data
+        e = self.experimental_setup[self.task][self.user_out][self.itr][self.mode][index]
+        trial = e['trial']
+
         from_line, to_line = e['from_line'], e['to_line']
-        return {'segment' : self.task_data[fname][from_line:to_line]}
+        trial_fname = f"{self.task}_{trial}.txt"
+        return {'segment' : self.task_data[self.task][trial_fname][from_line:to_line]}
 
     def __len__(self):
-        return len(self.data)
-
-task = "Knot_Tying"
-datasetdir = "dataset"
-path = os.path.join(datasetdir, "Experimental_setup", task, "Balanced", "GestureClassification", "UserOut", "1_Out", "itr_1")
-train_txt = os.path.join(path, "Train.txt")
-ds = JigsawsDataset(train_txt, task)
-
-fname = 'Knot_Tying_I002.txt'
-tpath = trial_path(task, fname)
-ds[0]['segment'].shape
-
+        return len(self.experimental_setup[self.task][self.user_out][self.itr][self.mode])
 # %%
-ds[1]['segment'].shape
+
+# task = "Knot_Tying"
+# datasetdir = "dataset"
+# path = os.path.join(datasetdir, "Experimental_setup", task, "Balanced", "GestureClassification", "UserOut", "1_Out", "itr_1")
+# train_txt = os.path.join(path, "Train.txt")
+ds = JigsawsDataset()
+# %%
+ds[0:1]
+# %%
+dl = DataLoader(ds, batch_size=2)
+# %%
+next(iter(dl))
 # %%
