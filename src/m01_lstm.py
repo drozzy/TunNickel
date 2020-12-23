@@ -14,9 +14,9 @@ class LSTMModel(pl.LightningModule):
         self.accuracy_val = pl.metrics.Accuracy()
 
     def forward(self, x):
-        x = x.permute(1, 0, 2)
         x, _ = self.lstm(x)
-        x = x[-1]
+        x = x[:, -1]
+        
         return self.final(x)
 
     def training_step(self, batch, batch_idx):
