@@ -7,6 +7,7 @@ from torch.utils.data import Dataset, DataLoader
 from numpy import genfromtxt
 import numpy as np
 
+
 # %% Task Data - read all of it into memory
 def cache_task_data(task):
     for fname in os.listdir(f"dataset/{task}/kinematics/AllGestures"):
@@ -34,9 +35,9 @@ def read_data():
         data[task] = read_task_data(task)
     return data
 
-task_data = read_data()
-# %%
-task_data.keys()
+# task_data = read_data()
+# # %%
+# task_data.keys()
 # %%
 # %% Experimental Setup data
 def parse_line(line, task):
@@ -81,25 +82,25 @@ def read_experimental_setup():
         exp_tasks[task] = read_exp_task(task)
     return exp_tasks
 # %%
-# tasks, tasks_setup = experimental_setup()
-exp_setup = read_experimental_setup()
-# %%
-gg = [f"G{i}" for i in range(1,16)]
-gg
+# # tasks, tasks_setup = experimental_setup()
+# exp_setup = read_experimental_setup()
+# # %%
+# gg = [f"G{i}" for i in range(1,16)]
+# gg
 def oneint(value, all_values):
     i = all_values.index(value)
     le = preprocessing.LabelEncoder()
     targets = le.fit_transform(all_values)
     return targets[i]
 
-oneint("G1", gg)
+# oneint("G1", gg)
 
 class JigsawsDataset(Dataset):
     def __init__(self, task="Knot_Tying", user_out="1_Out", train=True):        
         self.task = task
         self.user_out = user_out
-        
-        self.gestures = [f"G{i}" for i in range(1, 15+1)]
+        self.num_gestures = 15
+        self.gestures = [f"G{i}" for i in range(1, self.num_gestures+1)]
 
         le = preprocessing.LabelEncoder()
         self.targets = le.fit_transform(self.gestures)
@@ -134,13 +135,13 @@ class JigsawsDataset(Dataset):
 # datasetdir = "dataset"
 # path = os.path.join(datasetdir, "Experimental_setup", task, "Balanced", "GestureClassification", "UserOut", "1_Out", "itr_1")
 # train_txt = os.path.join(path, "Train.txt")
-ds = JigsawsDataset()
-# %%
-ds[1]
-# %%
-dl = DataLoader(ds)
-d = next(iter(dl))
-d['segment'].shape
+# ds = JigsawsDataset()
+# # %%
+# ds[1]
+# # %%
+# dl = DataLoader(ds)
+# d = next(iter(dl))
+# d['segment'].shape
 
 # %%
 # dl = DataLoader(ds, batch_size=2)
@@ -155,9 +156,9 @@ def pad_collate(batch):
     return xx_pad, yy, x_lens
 
 
-dl = DataLoader(dataset=ds, batch_size=32, shuffle=True, collate_fn=pad_collate)
-xx, yy, x_lens = next(iter(dl))
-print(xx.shape)
-print(yy.shape)
-print(x_lens)
+# dl = DataLoader(dataset=ds, batch_size=32, shuffle=True, collate_fn=pad_collate)
+# xx, yy, x_lens = next(iter(dl))
+# print(xx.shape)
+# print(yy.shape)
+# print(x_lens)
 # %%

@@ -1,17 +1,14 @@
 # %% Imports
 import torch.nn.functional as F
 import pytorch_lightning as pl
-from torchdyn.models import *
-from torchdyn import *
 import torch.nn as nn
-
-NUM_CLASSES = 3
+import torch
 # %% Baseline linear model
 class LSTMModel(pl.LightningModule):
-    def __init__(self):
+    def __init__(self, num_classes):
         super().__init__()
         self.lstm = nn.LSTM(input_size=76, hidden_size=64)
-        self.final = nn.Linear(64, NUM_CLASSES)
+        self.final = nn.Linear(64, num_classes)
         self.accuracy_train = pl.metrics.Accuracy()
         self.accuracy_test = pl.metrics.Accuracy()
         self.accuracy_val = pl.metrics.Accuracy()
@@ -24,7 +21,7 @@ class LSTMModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         # training_step defined the train loop, independent of forward
-        x, y = batch
+        x, y, xlens = batch
         y_pred_logits = self(x)
         loss = F.cross_entropy(y_pred_logits, y)
         
@@ -36,7 +33,7 @@ class LSTMModel(pl.LightningModule):
         self.log("train_acc_epoch", self.accuracy_train.compute())
 
     def validation_step(self, batch, batch_idx):
-        x, y = batch
+        x, y, xlens = batch
         y_pred_logits = self(x)
         loss = F.cross_entropy(y_pred_logits, y)
         
@@ -48,7 +45,7 @@ class LSTMModel(pl.LightningModule):
         self.log("val_acc_epoch", self.accuracy_val.compute())
 
     def test_step(self, batch, batch_idx):
-        x, y = batch
+        x, y, xlens = batch
         y_pred_logits = self(x)
         loss = F.cross_entropy(y_pred_logits, y)
         
