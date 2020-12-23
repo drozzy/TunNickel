@@ -67,10 +67,7 @@ def read_itr(task, user_out, itr):
     return modes
 
 def read_user_out(task, user_out):
-    itrs = {}
-    for itr in os.listdir(f"dataset/Experimental_setup/{task}/Balanced/GestureClassification/UserOut/{user_out}"):
-        itrs[itr] = read_itr(task, user_out, itr)
-    return itrs
+    return read_itr(task, user_out, "itr_1")
 
 def read_exp_task(task):
     user_outs = {}
@@ -98,16 +95,14 @@ def oneint(value, all_values):
 oneint("G1", gg)
 
 class JigsawsDataset(Dataset):
-    def __init__(self, task="Knot_Tying", user_out="1_Out", itr="itr_1", train=True):        
+    def __init__(self, task="Knot_Tying", user_out="1_Out", train=True):        
         self.task = task
         self.user_out = user_out
-        self.itr = itr
         
         self.gestures = [f"G{i}" for i in range(1, 15+1)]
 
         le = preprocessing.LabelEncoder()
         self.targets = le.fit_transform(self.gestures)
-    
 
         if train:
             self.mode = 'Train.txt'
@@ -119,7 +114,7 @@ class JigsawsDataset(Dataset):
 
     def __getitem__(self, index):
         e = self.task_data
-        e = self.experimental_setup[self.task][self.user_out][self.itr][self.mode][index]
+        e = self.experimental_setup[self.task][self.user_out][self.mode][index]
         trial = e['trial']
 
         from_line, to_line = e['from_line'], e['to_line']
@@ -132,7 +127,7 @@ class JigsawsDataset(Dataset):
         return {'segment' : segment, 'label': label_int}
 
     def __len__(self):
-        return len(self.experimental_setup[self.task][self.user_out][self.itr][self.mode])
+        return len(self.experimental_setup[self.task][self.user_out][self.mode])
 # %%
 
 # task = "Knot_Tying"
@@ -152,27 +147,17 @@ d['segment'].shape
 from torch.nn.utils.rnn import pad_sequence
 
 def pad_collate(batch):
-    yy = [b['label'] for b in batch]
+    yy = torch.tensor([b['label'] for b in batch])
     xx = [torch.tensor(d['segment'], dtype=torch.float32) for d in batch]
-    xx_pad = pad_sequence(xx)
-    # print(xx_pad)
-    # yy_pad = pad_sequence(yy, batch_first=True, padding_value=0)
+    xx_pad = pad_sequence(xx, batch_first=True)
     x_lens = [len(x) for x in xx]
 
     return xx_pad, yy, x_lens
 
 
 dl = DataLoader(dataset=ds, batch_size=32, shuffle=True, collate_fn=pad_collate)
-xx_pad, yy, x_lens = next(iter(dl))
-print(xx_pad.shape)
-print(len(yy))
+xx, yy, x_lens = next(iter(dl))
+print(xx.shape)
+print(yy.shape)
 print(x_lens)
-# %%
-
-# %%
-d = {'a': 1, 'b': 2}
-for k,v in d.items():
-    print(k, v)
-# %%
-d.values()
 # %%
