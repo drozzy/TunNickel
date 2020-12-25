@@ -7,8 +7,8 @@ import torch
 class LSTMModel(pl.LightningModule):
     def __init__(self, num_classes):
         super().__init__()
-        self.lstm = nn.LSTM(input_size=76, hidden_size=64, batch_first=True)
-        self.final = nn.Linear(64, num_classes)
+        self.lstm = nn.LSTM(input_size=76, hidden_size=88, batch_first=True)
+        self.final = nn.Linear(88, num_classes)
         self.accuracy_train = pl.metrics.Accuracy()
         self.accuracy_test = pl.metrics.Accuracy()
         self.accuracy_val = pl.metrics.Accuracy()
