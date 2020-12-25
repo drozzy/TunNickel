@@ -31,7 +31,7 @@ def read_task_data(task):
 
 def read_data():
     data = {}
-    for task in os.listdir("dataset/Experimental_Setup"):
+    for task in os.listdir("dataset/Experimental_setup"):
         data[task] = read_task_data(task)
     return data
 
@@ -78,7 +78,7 @@ def read_exp_task(task):
 
 def read_experimental_setup():
     exp_tasks = {}
-    for task in os.listdir("dataset/Experimental_Setup"):
+    for task in os.listdir("dataset/Experimental_setup"):
         exp_tasks[task] = read_exp_task(task)
     return exp_tasks
 # %%

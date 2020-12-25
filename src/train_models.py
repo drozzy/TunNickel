@@ -1,7 +1,7 @@
 # %% Imports
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
-from data_module import KinematicsDataModule
+from data_module import JigsawsDataModule
 from pytorch_lightning.loggers import WandbLogger
 import datetime
 from m01_lstm import LSTMModel
@@ -11,11 +11,13 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 # %% Train
 data = JigsawsDataModule(user_out="1_Out") # for cross validation
+data.prepare_data()
+data.setup()
 
 models = [
-    CnnModel(num_classes=data.num_classes),
-    LSTMModel(num_classes=data.num_classes),
-    NeuralODECnnModel(num_classes=data.num_classes)
+    CnnModel(num_classes=data.num_gestures),
+    LSTMModel(num_classes=data.num_gestures),
+    NeuralODECnnModel(num_classes=data.num_gestures)
 ]
 
 
