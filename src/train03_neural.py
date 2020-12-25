@@ -23,14 +23,12 @@ def run_name(model_obj):
 early_stop_callback = EarlyStopping(
     monitor='val_acc_epoch',
     patience=25,
-    verbose=False,
     mode='max'
 )
 n = run_name(model)
 
 checkpoint_callback = ModelCheckpoint(
     save_top_k=1,
-    verbose=True,
     monitor='val_acc_epoch',
     mode='max'
 )

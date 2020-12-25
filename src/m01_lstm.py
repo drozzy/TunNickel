@@ -20,7 +20,6 @@ class LSTMModel(pl.LightningModule):
         return self.final(x)
 
     def training_step(self, batch, batch_idx):
-        # training_step defined the train loop, independent of forward
         x, y, xlens = batch
         y_pred_logits = self(x)
         loss = F.cross_entropy(y_pred_logits, y)
@@ -42,7 +41,7 @@ class LSTMModel(pl.LightningModule):
         return loss
     
     def validation_epoch_end(self, outs):
-        self.log("val_acc_epoch", self.accuracy_val.compute())
+        self.log("val_acc_epoch", self.accuracy_val.compute(), prog_bar=True)
 
     def test_step(self, batch, batch_idx):
         x, y, xlens = batch

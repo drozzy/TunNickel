@@ -56,7 +56,7 @@ class NeuralODECnnModel(pl.LightningModule):
         return loss
     
     def validation_epoch_end(self, outs):
-        self.log("val_acc_epoch", self.accuracy_val.compute())
+        self.log("val_acc_epoch", self.accuracy_val.compute(), prog_bar=True)
 
     def test_step(self, batch, batch_idx):
         x, y, xlens = batch
