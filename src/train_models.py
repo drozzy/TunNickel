@@ -4,34 +4,20 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from data_module import KinematicsDataModule
 from pytorch_lightning.loggers import WandbLogger
 import datetime
-from m02_lstm import LSTMModel
-from m03_cnn import CnnModel
+from m01_lstm import LSTMModel
+from m02_cnn import CnnModel
 from m03_neuralode_cnn import NeuralODECnnModel
-from m05_anode import ANodeModel
 from pytorch_lightning.callbacks import ModelCheckpoint
 
-# %% Models 
+# %% Train
+data = JigsawsDataModule(user_out="1_Out") # for cross validation
+
 models = [
-    CnnModel(),
-    LSTMModel(),
-    NeuralODECnnModel()
+    CnnModel(num_classes=data.num_classes),
+    LSTMModel(num_classes=data.num_classes),
+    NeuralODECnnModel(num_classes=data.num_classes)
 ]
 
-# %% Test out  a model
-m = CnnModel()
-data = KinematicsDataModule()
-data.prepare_data()
-data.setup()
-x,y = next(iter(data.train_dataloader()))
-print("LABELS ARE:")
-print(y)
-print(x.shape, y.shape)
-outs = m(x)
-print(outs.shape)
-print(y)
-print(outs[0])
-# %% Train
-data = KinematicsDataModule()
 
 EPOCHS = 1000
 
@@ -44,14 +30,11 @@ for model in models:
     early_stop_callback = EarlyStopping(
         monitor='val_acc_epoch',
         patience=25,
-        verbose=False,
         mode='max'
     )
-    n = run_name(model)
-
+    
     checkpoint_callback = ModelCheckpoint(
         save_top_k=1,
-        verbose=True,
         monitor='val_acc_epoch',
         mode='max'
     )
@@ -59,11 +42,9 @@ for model in models:
     trainer = pl.Trainer(gpus=1, max_epochs=EPOCHS, 
         callbacks=[early_stop_callback, checkpoint_callback],
         logger=WandbLogger(run_name(model)))
+
     trainer.fit(model, data)
+
     results = trainer.test(datamodule=data);
-
-# %%
-
-trainer.test(datamodule=data);
 
 # %%
