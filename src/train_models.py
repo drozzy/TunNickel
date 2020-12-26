@@ -49,6 +49,10 @@ for model in models:
     trainer.fit(model, data)
 
     results = trainer.test(datamodule=data);
+
+    num_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
+            
+    wandb.run.summary["num_parameters"] = num_parameters
     wandb.finish()
 
 # %%
