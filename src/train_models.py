@@ -32,7 +32,7 @@ def run_name(model_obj):
 for model in models:
     early_stop_callback = EarlyStopping(
         monitor='val_acc_epoch',
-        patience=250,
+        patience=500,
         mode='max'
     )
     
