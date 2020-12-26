@@ -10,17 +10,20 @@ class NeuralODECnnModel(pl.LightningModule):
     def __init__(self, num_classes):
         super().__init__()
 
+        aug = 32
+        hidden = 64
+
         self.func = nn.Sequential(
-            nn.Conv1d(in_channels=76+10, out_channels=76+10, kernel_size=3, padding=1),
+            nn.Conv1d(in_channels=76+aug, out_channels=76+aug, kernel_size=3, padding=1),
             nn.Tanh()
         )
         self.neuralDE = NeuralDE(self.func)
         
-        self.convs = nn.Sequential(Augmenter(augment_dims=10),
+        self.convs = nn.Sequential(Augmenter(augment_dims=aug),
             self.neuralDE,
-            nn.Conv1d(76+10, 1, 3, padding=1))
+            nn.Conv1d(76+aug, hidden, 3, padding=1))
 
-        self.final = nn.Linear(1, num_classes)
+        self.final = nn.Linear(hidden, num_classes)
 
         self.accuracy_train = pl.metrics.Accuracy()
         self.accuracy_test = pl.metrics.Accuracy()

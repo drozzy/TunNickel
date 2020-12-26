@@ -8,12 +8,14 @@ import torch
 class CnnModel(pl.LightningModule):
     def __init__(self, num_classes):
         super().__init__()
+        hidden = 64
+        channels = 128
 
         self.convs = nn.Sequential(
-            nn.Conv1d(in_channels=76, out_channels=256, kernel_size=3, padding=1),
+            nn.Conv1d(in_channels=76, out_channels=channels, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Conv1d(in_channels=256, out_channels=1, kernel_size=3, padding=1))
-        self.final = nn.Linear(1, num_classes)
+            nn.Conv1d(in_channels=channels, out_channels=hidden, kernel_size=3, padding=1))
+        self.final = nn.Linear(hidden, num_classes)
 
         self.accuracy_train = pl.metrics.Accuracy()
         self.accuracy_test = pl.metrics.Accuracy()

@@ -8,6 +8,7 @@ from m01_lstm import LSTMModel
 from m02_cnn import CnnModel
 from m03_neuralode_cnn import NeuralODECnnModel
 from pytorch_lightning.callbacks import ModelCheckpoint
+import wandb
 
 # %% Train
 data = JigsawsDataModule(user_out="1_Out") # for cross validation
@@ -31,7 +32,7 @@ def run_name(model_obj):
 for model in models:
     early_stop_callback = EarlyStopping(
         monitor='val_acc_epoch',
-        patience=25,
+        patience=250,
         mode='max'
     )
     
@@ -40,13 +41,14 @@ for model in models:
         monitor='val_acc_epoch',
         mode='max'
     )
-    
+    name = run_name(model)
     trainer = pl.Trainer(gpus=1, max_epochs=EPOCHS, 
         callbacks=[early_stop_callback, checkpoint_callback],
-        logger=WandbLogger(run_name(model)))
+        logger=WandbLogger(name))
 
     trainer.fit(model, data)
 
     results = trainer.test(datamodule=data);
+    wandb.finish()
 
 # %%
