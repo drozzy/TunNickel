@@ -11,6 +11,8 @@ dependencies:
   - cudatoolkit=10.2
   - pip:
     - "--editable=git+https://github.com/DiffEqML/torchdyn.git@43d22ce5e12dc1a298ef8c11e64f015b05a60765#egg=torchdyn"
+    - wandb
+    - pytorch-lightning
 
 
     
