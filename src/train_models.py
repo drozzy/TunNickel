@@ -48,7 +48,7 @@ for model in models:
 
     trainer.fit(model, data)
 
-    #results = trainer.test(datamodule=data);
+    results = trainer.test(datamodule=data);
     wandb.finish()
 
 # %%

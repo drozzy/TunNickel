@@ -14,6 +14,9 @@ class JigsawsDataModule(pl.LightningDataModule):
                 user_out=self.user_out, train=True)
         self.val_dataset = JigsawsDataset(task=self.task, 
                 user_out=self.user_out, train=False)
+        # Use the same dataset for testing - just to plot the best validation score
+        self.test_dataset = JigsawsDataset(task=self.task, 
+                user_out=self.user_out, train=False)
 
         self.num_gestures = self.train_dataset.num_gestures
         
@@ -23,8 +26,8 @@ class JigsawsDataModule(pl.LightningDataModule):
     def val_dataloader(self):
         return DataLoader(dataset=self.val_dataset, batch_size=128, collate_fn=pad_collate)
 
-    #def test_dataloader(self):
-        #return DataLoader(dataset=self.test_dataset, batch_size=128, collate_fn=pad_collate)
+    def test_dataloader(self):
+        return DataLoader(dataset=self.test_dataset, batch_size=128, collate_fn=pad_collate)
 # %%
 # dm = JigsawsDataModule()
 # dm.prepare_data()
