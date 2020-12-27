@@ -27,12 +27,12 @@ def main(patience=500, max_epochs=1000, use_wandb=True):
     num_classes = d.num_gestures
 
     model_classes = [
-        CnnModel,
-        LSTMModel,
-        NeuralODECnnModel
+        (CnnModel, 0.001),
+        (LSTMModel, 0.0005),
+        (NeuralODECnnModel, 0.0005)
     ]
 
-    for model_class in model_classes:
+    for (model_class, model_lr) in model_classes:
         model_result = {}
         r[model_class.__name__] = model_result
 
@@ -47,7 +47,7 @@ def main(patience=500, max_epochs=1000, use_wandb=True):
                 patience=patience,
                 mode='max'
             )
-            model = model_class(num_classes, lr=0.01)
+            model = model_class(num_classes, lr=model_lr)
             
             checkpoint_callback = ModelCheckpoint(
                 save_top_k=1,
