@@ -47,7 +47,7 @@ def main(patience=500, max_epochs=1000, use_wandb=True):
                 patience=patience,
                 mode='max'
             )
-            model = model_class(num_classes)
+            model = model_class(num_classes, lr=0.01)
             
             checkpoint_callback = ModelCheckpoint(
                 save_top_k=1,

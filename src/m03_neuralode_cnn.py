@@ -7,9 +7,9 @@ import torch.nn as nn
 
 # %% Baseline linear model
 class NeuralODECnnModel(pl.LightningModule):
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, lr):
         super().__init__()
-
+        self.lr = lr
         aug = 32
         hidden = 64
 
@@ -75,7 +75,7 @@ class NeuralODECnnModel(pl.LightningModule):
 
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters())
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
 
 # %%

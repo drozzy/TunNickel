@@ -8,10 +8,10 @@ from m03_neuralode_cnn import NeuralODECnnModel
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 # %% Model
-data = JigsawsDataModule(user_out="1_Out") # for cross validation
+data = JigsawsDataModule(user_out="2_Out") # for cross validation
 data.prepare_data()
 data.setup()
-model = NeuralODECnnModel(data.num_gestures)
+model = NeuralODECnnModel(data.num_gestures, lr=0.001)
 
 EPOCHS = 10
 
@@ -36,10 +36,18 @@ checkpoint_callback = ModelCheckpoint(
 trainer = pl.Trainer(gpus=0, max_epochs=EPOCHS, 
     callbacks=[early_stop_callback, checkpoint_callback])
 
-trainer.fit(model, data)
+lr_finder = trainer.tuner.lr_find(model, data)
+fig = lr_finder.plot(suggest=True)
+fig.show()
 
-# %% Test 
-trainer.test(datamodule=data);
+# Pick point based on plot, or get suggestion
+new_lr = lr_finder.suggestion()
+print(f"Suggested learning rate: {new_lr}")
+
+# trainer.fit(model, data)
+
+# # %% Test 
+# trainer.test(datamodule=data);
 
 # %%
 # %%
@@ -51,6 +59,6 @@ trainer.test(datamodule=data);
 # outs = model(xx)
 # print(outs.shape)
 # print(outs[0])
-import torch
-torch.utils.data.random_split(range(10), [0.1, 0.9], generator=torch.Generator().manual_seed(42))
+# import torch
+# torch.utils.data.random_split(range(10), [0.1, 0.9], generator=torch.Generator().manual_seed(42))
 # %%

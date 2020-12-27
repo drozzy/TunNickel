@@ -6,10 +6,11 @@ import torch
 
 # %% 
 class CnnModel(pl.LightningModule):
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, lr):
         super().__init__()
         hidden = 64
         channels = 128
+        self.lr = lr
 
         self.convs = nn.Sequential(
             nn.Conv1d(in_channels=76, out_channels=channels, kernel_size=3, padding=1),
@@ -66,7 +67,7 @@ class CnnModel(pl.LightningModule):
 
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters())
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
 
 # %%

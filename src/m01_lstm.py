@@ -5,9 +5,10 @@ import torch.nn as nn
 import torch
 # %% Baseline linear model
 class LSTMModel(pl.LightningModule):
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, lr):
         super().__init__()
         hidden = 86
+        self.lr = lr
         self.lstm = nn.LSTM(input_size=76, hidden_size=hidden, batch_first=True)
         self.final = nn.Linear(hidden, num_classes)
         self.accuracy_train = pl.metrics.Accuracy()
@@ -58,7 +59,7 @@ class LSTMModel(pl.LightningModule):
 
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters())
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
 
 # %%
