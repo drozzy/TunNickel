@@ -43,7 +43,7 @@ def run_experiment(patience=500, max_epochs=1000, use_wandb=True):
 
 def run_model_trial(model_class, num_classes, model_lr, patience, use_wandb, max_epochs):
     model_result = {}
-    for task in ['Knot_Tying']:
+    for task in ['Knot_Tying', 'Needle_Passing', 'Suturing']:
         task_result = run_task_trial(task=task, model_class=model_class, num_classes=num_classes, model_lr=model_lr, patience=patience, use_wandb=use_wandb, max_epochs=max_epochs)
         model_result[task] = task_result
     return model_result
