@@ -135,7 +135,7 @@ def write_results(r, prefix):
 
 
 if __name__ == '__main__':
-    run_experiment(max_epochs=10, use_wandb=False)
+    run_experiment(max_epochs=1000, use_wandb=False)
 
 
 # %%
