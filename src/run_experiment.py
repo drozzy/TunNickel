@@ -120,20 +120,22 @@ def save_results(r):
     timestamp = str(datetime.datetime.now()).split('.')[0].split(' ')
     date = timestamp[0]
     time = timestamp[1]
-    
+    prefix = f"{date}_{time}"
     s = summary(r)
-    write_summary(s, date, time)
-    write_results(r, date, time)
+    write_summary(s, prefix)
+    write_results(r, prefix)
 
-def write_summary(s, timestamp):
-    with open(f"{date}_{time}_Summary.txt", 'w') as f:
+def write_summary(s, prefix):
+    with open(f"{prefix}_Summary.txt", 'w') as f:
         f.write(s)
     
-def write_results(s):
-    with open(f"{date}_{time}_Results.json", 'w') as f:
+def write_results(r, prefix):
+    with open(f"{prefix}_Results.json", 'w') as f:
         json.dump(r, f)
 
 
 if __name__ == '__main__':
     run_experiment(max_epochs=10, use_wandb=False)
 
+
+# %%
