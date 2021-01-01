@@ -42,20 +42,27 @@ def run_experiment(patience=500, max_epochs=1000, use_wandb=True):
     write_summary(s)
 
 def run_model_trial(model_class, num_classes, model_lr, patience, use_wandb, max_epochs):
+    print(f"- Model Trial: {model_class.__name__}")
     model_result = {}
     for task in ['Knot_Tying', 'Needle_Passing', 'Suturing']:
         task_result = run_task_trial(task=task, model_class=model_class, num_classes=num_classes, model_lr=model_lr, patience=patience, use_wandb=use_wandb, max_epochs=max_epochs)
         model_result[task] = task_result
     return model_result
 
-def run_task_trial(task,  model_class, num_classes, model_lr, patience, use_wandb, max_epochs):    
+def run_task_trial(task,  model_class, num_classes, model_lr, patience, use_wandb, max_epochs): 
+    print(f"-- Task Trial: {task} [{model_class.__name__}]")   
     task_result = {}
     for user_out in [1,2,3,4,5,6,7,8]: # 8-way cross validation
+        data_missing = (task == 'Needle_Passing' and user_out == 6)
+        if data_missing:
+            continue
+
         user_result = run_user_trial(task=task, user_out=user_out, model_class=model_class, num_classes=num_classes, model_lr=model_lr, patience=patience, use_wandb=use_wandb, max_epochs=max_epochs)
         task_result[user_out] = user_result        
     return task_result
 
 def run_user_trial(task, user_out, model_class, num_classes, model_lr, patience, use_wandb, max_epochs):
+    print(f"--- User Out Trial: {user_out} [{task} --- {model_class.__name__}]")   
     user_result = {}    
 
     data = JigsawsDataModule(task=task, user_out=f"{user_out}_Out") 
