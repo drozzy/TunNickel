@@ -12,7 +12,7 @@ from m02_cnn import CnnModel
 from m03_neuralode_cnn import NeuralODECnnModel
 from pytorch_lightning.callbacks import ModelCheckpoint
 import wandb
-
+import json
 
 def make_trial_name(model_class):
     name = model_class.__name__.split("Model")[0]
@@ -37,9 +37,9 @@ def run_experiment(patience=500, max_epochs=1000, use_wandb=True):
         model_result = run_model_trial(model_class=model_class, num_classes=num_classes, model_lr=model_lr, patience=patience, use_wandb=use_wandb, max_epochs=max_epochs)
         r[model_class.__name__] = model_result
 
-    s = summary(r)
-    print(s)
-    write_summary(s)
+    print(summary(r))    
+    save_results(r)
+    
 
 def run_model_trial(model_class, num_classes, model_lr, patience, use_wandb, max_epochs):
     print(f"- Model Trial: {model_class.__name__}")
@@ -109,18 +109,29 @@ def summary(r):
             user_accs = []
             for user_out, user_r in task_r.items():
                 acc = user_r["test_acc_epoch"]
-                summary += f"        UserOut_{user_out} Acc = {acc}\n"
+                # summary += f"        UserOut_{user_out} Acc = {acc}\n"
                 user_accs.append(acc)
-            summary += f"Model Accuracy Mean: {np.mean(user_accs)}\n"
-            summary += f"Model Accuracy Variance: {np.var(user_accs)}\n\n"
+            summary += f"Mean: {np.mean(user_accs)}\n"
+            summary += f"Variance: {np.var(user_accs)}\n\n"
+            summary += f"Stdev: {np.std(user_accs)}\n\n"
     return summary
 
-def write_summary(s):
+def save_results(r):
     timestamp = str(datetime.datetime.now()).split('.')[0].split(' ')
     date = timestamp[0]
     time = timestamp[1]
-    with open(f"Results_{date}_{time}.csv", 'w') as f:
+    
+    s = summary(r)
+    write_summary(s, date, time)
+    write_results(r, date, time)
+
+def write_summary(s, timestamp):
+    with open(f"{date}_{time}_Summary.txt", 'w') as f:
         f.write(s)
+    
+def write_results(s):
+    with open(f"{date}_{time}_Results.json", 'w') as f:
+        json.dump(r, f)
 
 
 if __name__ == '__main__':
