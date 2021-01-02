@@ -1,0 +1,54 @@
+Task: Knot_Tying ---- CnnModel ---
+Mean: 0.8098312690854073
+Variance: 0.00953110525747064
+
+Stdev: 0.0976273796507447
+
+Task: Needle_Passing ---- CnnModel ---
+Mean: 0.6767701378890446
+Variance: 0.013451992845016202
+
+Stdev: 0.1159827264941474
+
+Task: Suturing ---- CnnModel ---
+Mean: 0.8006464093923569
+Variance: 0.01116996404830295
+
+Stdev: 0.10568805064103959
+
+Task: Knot_Tying ---- LSTMModel ---
+Mean: 0.6863764300942421
+Variance: 0.00855836486854139
+
+Stdev: 0.0925114310155312
+
+Task: Needle_Passing ---- LSTMModel ---
+Mean: 0.6354406476020813
+Variance: 0.010525086725369956
+
+Stdev: 0.10259184531613591
+
+Task: Suturing ---- LSTMModel ---
+Mean: 0.7285075336694717
+Variance: 0.03235367855976956
+
+Stdev: 0.17987128331050947
+
+Task: Knot_Tying ---- NeuralODECnnModel ---
+Mean: 0.8291629701852798
+Variance: 0.007589234279988366
+
+Stdev: 0.08711621135006024
+
+Task: Needle_Passing ---- NeuralODECnnModel ---
+Mean: 0.6424927200589862
+Variance: 0.00439915494999804
+
+Stdev: 0.06632612569717938
+
+Task: Suturing ---- NeuralODECnnModel ---
+Mean: 0.7838999256491661
+Variance: 0.013422818904452904
+
+Stdev: 0.11585688975823968
+
