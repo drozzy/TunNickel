@@ -35,7 +35,7 @@ def run_task_trial(task,  model, patience, max_epochs, user_ids):
 
 def run_user_out_trials(task, model, patience, max_epochs, user_ids):
     r = {}
-    for user_out in user_ids: # 8-way cross validation
+    for user_out in user_ids: # n-way cross validation
         data_missing = (task == 'Needle_Passing' and user_out == 6)
         if data_missing:
             continue
