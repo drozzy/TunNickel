@@ -2,20 +2,20 @@
 import torch
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
-from dataset import pad_collate, JigsawsDataset            
-class JigsawsDataModule(pl.LightningDataModule):
+from dataset_louo import pad_collate, LouoDataset            
+class LouoDataModule(pl.LightningDataModule):
     def __init__(self, task="Knot_Tying", user_out="1_Out"):
         super().__init__()
         self.task = task
         self.user_out = user_out
     
     def setup(self, stage=None):
-        self.train_dataset = JigsawsDataset(task=self.task, 
+        self.train_dataset = LouoDataset(task=self.task, 
                 user_out=self.user_out, train=True)
-        self.val_dataset = JigsawsDataset(task=self.task, 
+        self.val_dataset = LouoDataset(task=self.task, 
                 user_out=self.user_out, train=False)
         # Use the same dataset for testing - just to plot the best validation score
-        self.test_dataset = JigsawsDataset(task=self.task, 
+        self.test_dataset = LouoDataset(task=self.task, 
                 user_out=self.user_out, train=False)
 
         self.num_gestures = self.train_dataset.num_gestures
@@ -29,7 +29,7 @@ class JigsawsDataModule(pl.LightningDataModule):
     def test_dataloader(self):
         return DataLoader(dataset=self.test_dataset, batch_size=128, collate_fn=pad_collate)
 # %%
-# dm = JigsawsDataModule()
+# dm = LouoDataModule()
 # dm.prepare_data()
 # dm.setup()
 # print("Train, Val:")

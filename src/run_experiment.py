@@ -1,7 +1,7 @@
 # %% Imports
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
-from data_module import JigsawsDataModule
+from data_module_louo import LouoDataModule
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 def run_experiment(trials, num_classes, patience, max_epochs, user_ids):
@@ -45,7 +45,7 @@ def run_user_out_trials(task, model, patience, max_epochs, user_ids):
     return r
 
 def run_user_trial(task, user_out, model, patience, max_epochs):
-    data = JigsawsDataModule(task=task, user_out=f"{user_out}_Out") 
+    data = LouoDataModule(task=task, user_out=f"{user_out}_Out") 
     trainer = create_trainer(patience, max_epochs)    
     trainer.fit(model, datamodule=data)
     results = trainer.test(datamodule=data)
@@ -72,7 +72,7 @@ def log_num_params(model):
     print(f"Number of model parameters: {num_parameters}")
 
 def get_num_classes():
-    d = JigsawsDataModule(user_out=f"1_Out")
+    d = LouoDataModule(user_out=f"1_Out")
     d.prepare_data()
     d.setup()
     return d.num_gestures 

@@ -1,43 +1,11 @@
 # %%
 from sklearn import preprocessing
-from genericpath import exists
 import torch
 import os
 from torch.utils.data import Dataset, DataLoader
-from numpy import genfromtxt
 import numpy as np
+from read_data import read_data
 
-
-# %% Task Data - read all of it into memory
-def cache_task_data(task):
-    for fname in os.listdir(f"dataset/{task}/kinematics/AllGestures"):
-        data = genfromtxt(f"dataset/{task}/kinematics/AllGestures/{fname}")
-        to = f"cached/{task}/{fname}.npy"
-        np.save(to, data)
-
-def read_cached(task):
-    data = {}
-    for fname in os.listdir(f"cached/{task}"):
-        d = np.load(f"cached/{task}/{fname}")
-        trial_name, _ = fname.split(".npy") 
-        data[trial_name] = d
-    return data
-        
-def read_task_data(task):
-    if not os.path.exists(f"cached/{task}"):
-        os.makedirs(f"cached/{task}", exist_ok=True)
-        cache_task_data(task)
-    return read_cached(task)
-
-def read_data():
-    data = {}
-    for task in os.listdir("dataset/Experimental_setup"):
-        data[task] = read_task_data(task)
-    return data
-
-# task_data = read_data()
-# # %%
-# task_data.keys()
 # %%
 # %% Experimental Setup data
 def parse_line(line, task):
@@ -95,7 +63,7 @@ def oneint(value, all_values):
 
 # oneint("G1", gg)
 
-class JigsawsDataset(Dataset):
+class LouoDataset(Dataset):
     def __init__(self, task="Knot_Tying", user_out="1_Out", train=True):        
         self.task = task
         self.user_out = user_out
@@ -135,7 +103,7 @@ class JigsawsDataset(Dataset):
 # datasetdir = "dataset"
 # path = os.path.join(datasetdir, "Experimental_setup", task, "Balanced", "GestureClassification", "UserOut", "1_Out", "itr_1")
 # train_txt = os.path.join(path, "Train.txt")
-# ds = JigsawsDataset()
+# ds = LouoDataset()
 # # %%
 # ds[1]
 # # %%

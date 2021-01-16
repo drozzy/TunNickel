@@ -90,7 +90,7 @@ class NeuralODECnnModel(pl.LightningModule):
 # # %% Graph stuff!
 # import torch
 # BATCH= 50
-# from data_module import KinematicsDataModule
+# from data_module_louo import KinematicsDataModule
 
 # data = KinematicsDataModule()
 # data.prepare_data()
