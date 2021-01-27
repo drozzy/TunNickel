@@ -34,7 +34,7 @@ def collect_analysis(results):
                     lines.append(line)
 
     lines.sort()
-    
+
     r = [header]
     r.extend(lines)
     return r
@@ -68,7 +68,7 @@ def write_analysis(r):
 
 # # %% Test it out
 
-fname = "2021-01-26_22_25_30_Results.json"
-r = read_results(fname)
-write_analysis(r)
+# fname = "2021-01-26_22_25_30_Results.json"
+# r = read_results(fname)
+# write_analysis(r)
 # %%
