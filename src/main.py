@@ -37,10 +37,12 @@ def short_experiment():
     num_gestures = 15
     num_classes = num_gestures
     
-    tasks = ['Knot_Tying']
+    tasks = ['Knot_Tying', 'Needle_Passing', 'Suturing']
 
     model_specs = [
-        (CnnModel, num_classes, 0.001)
+        (CnnModel, num_classes, 0.001),
+        (LSTMModel, num_classes, 0.0005),
+        (NeuralODECnnModel, num_classes, 0.0005)
     ]
     user_ids=[1]
     super_trial_ids = [5]
