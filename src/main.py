@@ -1,9 +1,10 @@
 # %%
-from analysis import write_results, read_results, summary, write_summary
+from analysis import write_results, read_results, write_analysis
 from run_experiment import run_experiment
 from m01_lstm import LSTMModel
 from m02_cnn import CnnModel
 from m03_neuralode_cnn import NeuralODECnnModel
+
 
 
 def main(model_specs, tasks, user_ids, super_trial_ids, patience, max_epochs, num_gestures):
@@ -12,9 +13,8 @@ def main(model_specs, tasks, user_ids, super_trial_ids, patience, max_epochs, nu
         super_trial_ids=super_trial_ids,
         patience=patience, max_epochs=max_epochs, num_gestures=num_gestures)
     fname = write_results(r)
-    r = read_results(fname)
-    s = summary(r)
-    fname = write_summary(s)
+    r = read_results(fname)    
+    fname = write_analysis(r)
 
 
 def regular_experiment():
