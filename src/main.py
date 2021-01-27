@@ -31,7 +31,7 @@ def regular_experiment():
     user_ids=[1,2,3,4,5,6,7,8]
     super_trial_ids = [1,2,3,4,5]
     main(model_specs=model_specs, tasks=tasks, super_trial_ids=super_trial_ids, 
-        user_ids=user_ids, patience=500, max_epochs=1000, num_gestures=num_gestures)
+        user_ids=user_ids, patience=1000, max_epochs=2000, num_gestures=num_gestures)
     
 def short_experiment():
     num_gestures = 15
@@ -50,7 +50,7 @@ def short_experiment():
         user_ids=user_ids, patience=200, max_epochs=1000, num_gestures=num_gestures)
     
 if __name__ == '__main__':
-    short_experiment()
+    regular_experiment()
 
 
 # %%
