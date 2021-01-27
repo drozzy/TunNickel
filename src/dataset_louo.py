@@ -64,10 +64,10 @@ def oneint(value, all_values):
 # oneint("G1", gg)
 
 class LouoDataset(Dataset):
-    def __init__(self, task="Knot_Tying", user_out="1_Out", train=True):        
+    def __init__(self, task="Knot_Tying", user_out="1_Out", train=True, num_gestures=15):        
         self.task = task
         self.user_out = user_out
-        self.num_gestures = 15
+        self.num_gestures = num_gestures
         self.gestures = [f"G{i}" for i in range(1, self.num_gestures+1)]
 
         le = preprocessing.LabelEncoder()
