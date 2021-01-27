@@ -13,15 +13,15 @@ def get_model_name(model_spec):
     (model_class, _, _) = model_spec
     return model_class.__name__
 
-def run_experiment(model_specs, tasks, patience, max_epochs, tasks, user_ids, super_trial_ids, num_gestures):
+def run_experiment(model_specs, tasks, patience, max_epochs, user_ids, super_trial_ids, num_gestures):
     r = {}
     for model_spec in model_specs:        
         model = make_model(model_spec)
         model_name = get_model_name(model_spec)
-        r[model_name] = model_trial(model=model, tasks=tasks, patience=patience, max_epochs=max_epochs, tasks=tasks, user_ids=user_ids, super_trial_ids=super_trial_ids, num_gestures=num_gestures)
+        r[model_name] = model_trial(model=model, tasks=tasks, patience=patience, max_epochs=max_epochs, user_ids=user_ids, super_trial_ids=super_trial_ids, num_gestures=num_gestures)
     return r
 
-def model_trial(model, tasks, patience, max_epochs, tasks, user_ids, super_trial_ids, num_gestures):
+def model_trial(model, tasks, patience, max_epochs, user_ids, super_trial_ids, num_gestures):
     r = {}
     for task in tasks:
         task_result = task_trial(task=task, model=model, patience=patience, max_epochs=max_epochs, user_ids=user_ids, super_trial_ids=super_trial_ids, num_gestures=num_gestures)
@@ -30,8 +30,9 @@ def model_trial(model, tasks, patience, max_epochs, tasks, user_ids, super_trial
 
 def task_trial(task,  model, patience, max_epochs, user_ids, super_trial_ids, num_gestures): 
     r = {}
-    r["LOUO"] = louo_trials(task, model, patience, max_epochs, user_ids, num_gestures)     
     r["LOSO"] = loso_trials(task, model, patience, max_epochs, super_trial_ids, num_gestures)
+    r["LOUO"] = louo_trials(task, model, patience, max_epochs, user_ids, num_gestures)     
+    
     return r
 
 def loso_trials(task, model, patience, max_epochs, super_trial_ids, num_gestures):
@@ -60,7 +61,7 @@ def loso_trial(task, super_trial_out, model, patience, max_epochs, num_gestures)
     log_num_params(model)
     return results
 
-def louo_trial(task, user_out, model, patience, max_epochs):
+def louo_trial(task, user_out, model, patience, max_epochs, num_gestures):
     data = LouoDataModule(task=task, user_out=f"{user_out}_Out", num_gestures=num_gestures) 
     trainer = create_trainer(patience, max_epochs)    
     trainer.fit(model, datamodule=data)

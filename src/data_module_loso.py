@@ -13,12 +13,12 @@ class LosoDataModule(pl.LightningDataModule):
     
     def setup(self, stage=None):
         self.train_dataset = LosoDataset(task=self.task, 
-                super_trial_out=self.super_trial_out, train=True, num_gestures=num_gestures)
+                super_trial_out=self.super_trial_out, train=True, num_gestures=self.num_gestures)
         self.val_dataset = LosoDataset(task=self.task, 
-                super_trial_out=self.super_trial_out, train=False, num_gestures=num_gestures)
+                super_trial_out=self.super_trial_out, train=False, num_gestures=self.num_gestures)
         # Use the same dataset for testing - just to plot the best validation score
         self.test_dataset = LosoDataset(task=self.task, 
-                super_trial_out=self.super_trial_out, train=False, num_gestures=num_gestures)
+                super_trial_out=self.super_trial_out, train=False, num_gestures=self.num_gestures)
         
     def train_dataloader(self):
         return DataLoader(dataset=self.train_dataset, batch_size=32, shuffle=True, collate_fn=pad_collate)
