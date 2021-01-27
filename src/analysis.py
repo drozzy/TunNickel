@@ -2,7 +2,7 @@
 import datetime, json
 import numpy as np
 import csv
-
+import pandas as pd
 
 def write_results(r):
     prefix = get_prefix()
@@ -65,6 +65,15 @@ def write_analysis(r):
         spamwriter = csv.writer(csvfile, delimiter=',')
         for line in l:
             spamwriter.writerow(line)
+            
+    return fname
+
+
+def analysis_df(fname):    
+    df = pd.read_csv(fname)
+    df = df.set_index(['EvalType','Method', 'Task'])
+    df = df[:]*100
+    return df
 
 # # %% Test it out
 
@@ -74,3 +83,4 @@ def write_analysis(r):
 # # %%
 
 # %%
+

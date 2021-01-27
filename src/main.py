@@ -1,5 +1,5 @@
 # %%
-from analysis import write_results, read_results, write_analysis
+from analysis import write_results, read_results, write_analysis, analysis_df
 from run_experiment import run_experiment
 from m01_lstm import LSTMModel
 from m02_cnn import CnnModel
@@ -15,7 +15,10 @@ def main(model_specs, tasks, user_ids, super_trial_ids, patience, max_epochs, nu
     fname = write_results(r)
     r = read_results(fname)    
     fname = write_analysis(r)
-
+    df = analysis_df(fname)
+    df
+    print("Final results: ")
+    print(df)
 
 def regular_experiment():
     num_gestures = 15
