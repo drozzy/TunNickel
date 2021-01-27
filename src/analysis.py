@@ -68,9 +68,9 @@ def write_analysis(r):
 
 # # %% Test it out
 
-fname = "2021-01-27_00_29_02_Results.json"
-r = read_results(fname)
-write_analysis(r)
-# %%
+# fname = "2021-01-27_00_29_02_Results.json"
+# r = read_results(fname)
+# write_analysis(r)
+# # %%
 
 # %%
