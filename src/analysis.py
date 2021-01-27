@@ -23,7 +23,7 @@ def collect_analysis(results):
     for model_name, model_r in results.items():
         for task_name, task_r in model_r.items():
             for eval_type, eval_r in task_r.items():
-                for out_id, out_r in eval_r.items():
+                # for out_id, out_r in eval_r.items():
 
                     accs = get_accs(eval_r)
                     mean = np.mean(accs)
@@ -68,7 +68,9 @@ def write_analysis(r):
 
 # # %% Test it out
 
-# fname = "2021-01-26_22_25_30_Results.json"
-# r = read_results(fname)
-# write_analysis(r)
+fname = "2021-01-27_00_29_02_Results.json"
+r = read_results(fname)
+write_analysis(r)
+# %%
+
 # %%
