@@ -8,7 +8,7 @@ from numpy import genfromtxt
 import numpy as np
 
 
-# %% Task Data - read all of it into memory
+# Task Data - read all of it into memory
 def cache_task_data(task):
     for fname in os.listdir(f"dataset/{task}/kinematics/AllGestures"):
         data = genfromtxt(f"dataset/{task}/kinematics/AllGestures/{fname}")
@@ -38,7 +38,7 @@ def read_data():
 # task_data = read_data()
 # # %%
 # task_data.keys()
-# %%
+
 # %% Experimental Setup data
 def parse_line(line, task):
     spec, label = line.split()
@@ -95,6 +95,7 @@ def oneint(value, all_values):
 
 # oneint("G1", gg)
 
+# TODO: Rename to "ClassificationDataset"
 class JigsawsDataset(Dataset):
     def __init__(self, task="Knot_Tying", user_out="1_Out", train=True):        
         self.task = task
@@ -129,6 +130,35 @@ class JigsawsDataset(Dataset):
 
     def __len__(self):
         return len(self.experimental_setup[self.task][self.user_out][self.mode])
+
+class SegmentationDataset(Dataset):
+    def __init__(self, task="Knot_Tying", user_out="1_Out", train=True):        
+        self.task = task
+        self.user_out = user_out
+        self.num_gestures = 15
+        self.gestures = [f"G{i}" for i in range(1, self.num_gestures+1)]
+
+        le = preprocessing.LabelEncoder()
+        self.targets = le.fit_transform(self.gestures)
+
+        if train:
+            self.mode = 'Train.txt'
+        else:
+            self.mode = 'Test.txt'
+
+        self.data = read_data()
+        self.trial_data = self.data[task]
+        self.trials = sorted(self.trial_data.keys())
+
+        self.experimental_setup = read_experimental_setup()
+
+    def __getitem__(self, index):
+        trial = self.trials[index]
+        # TODO: Add label as well
+        return self.trial_data[trial]
+
+    def __len__(self):
+        return len(self.trials)
 # %%
 
 # task = "Knot_Tying"
@@ -142,6 +172,17 @@ class JigsawsDataset(Dataset):
 # dl = DataLoader(ds)
 # d = next(iter(dl))
 # d['segment'].shape
+
+# %% Segmentation dataset test
+
+task = "Knot_Tying"
+datasetdir = "dataset"
+path = os.path.join(datasetdir, "Experimental_setup", task, "Balanced", "GestureClassification", "UserOut", "1_Out", "itr_1")
+train_txt = os.path.join(path, "Train.txt")
+ds = SegmentationDataset()
+ds[0].shape
+# %%
+
 
 # %%
 # dl = DataLoader(ds, batch_size=2)
