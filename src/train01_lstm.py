@@ -1,14 +1,14 @@
 # %% Imports
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
-from data_module import JigsawsDataModule
+from data_module_louo import LouoDataModule
 # from pytorch_lightning.loggers import WandbLogger
 import datetime
 from m01_lstm import LSTMModel
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 # %% Model
-data = JigsawsDataModule(user_out="1_Out") # for cross validation
+data = LouoDataModule(user_out="1_Out") # for cross validation
 data.prepare_data()
 data.setup()
 model = LSTMModel(data.num_gestures, lr=0.001)
