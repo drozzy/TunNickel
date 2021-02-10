@@ -46,7 +46,7 @@ class SegmentationDataset(Dataset):
         return trial_kinematic_data, labels, mask
 
     def __len__(self):
-        return len(self.trials)
+        return len(self.trial_keys)
 
     def labels_and_mask(self, trial_kinematic_data, trial_name):
         length, _ = trial_kinematic_data.shape
