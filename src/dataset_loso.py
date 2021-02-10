@@ -4,7 +4,7 @@ import torch
 import os
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
-from read_data import read_data
+from read_data import read_kinematic_data
 
 # %%
 # %% Experimental Setup data
@@ -78,7 +78,7 @@ class LosoDataset(Dataset):
         else:
             self.mode = 'Test.txt'
 
-        self.task_data = read_data()
+        self.task_data = read_kinematic_data()
         self.experimental_setup = read_experimental_setup()
 
     def __getitem__(self, index):
