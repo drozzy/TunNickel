@@ -9,8 +9,8 @@ from torch.nn.utils.rnn import pad_sequence
 def pad_collate(batch):
     # trial_kinematic_data, labels, mask <- batch
     xx = [torch.tensor(b[0], dtype=torch.float32) for b in batch]
-    yy = [torch.tensor(b[1], dtype=torch.float32) for b in batch]
-    xx_mask = [torch.tensor(b[2], dtype=torch.float32) for b in batch]
+    yy = [torch.tensor(b[1], dtype=torch.int64) for b in batch]
+    xx_mask = [torch.tensor(b[2], dtype=torch.int64) for b in batch]
 
     # yy = torch.tensor([b['label'] for b in batch])
     # xx = [torch.tensor(d['segment'], dtype=torch.float32) for d in batch]
