@@ -98,34 +98,6 @@ class LouoDataset(Dataset):
     def __len__(self):
         return len(self.experimental_setup[self.task][self.user_out][self.mode])
 
-class SegmentationDataset(Dataset):
-    def __init__(self, task="Knot_Tying", user_out="1_Out", train=True):        
-        self.task = task
-        self.user_out = user_out
-        self.num_gestures = 15
-        self.gestures = [f"G{i}" for i in range(1, self.num_gestures+1)]
-
-        le = preprocessing.LabelEncoder()
-        self.targets = le.fit_transform(self.gestures)
-
-        if train:
-            self.mode = 'Train.txt'
-        else:
-            self.mode = 'Test.txt'
-
-        self.data = read_kinematic_data()
-        self.trial_data = self.data[task]
-        self.trials = sorted(self.trial_data.keys())
-
-        self.experimental_setup = read_experimental_setup()
-
-    def __getitem__(self, index):
-        trial = self.trials[index]
-        # TODO: Add label as well
-        return self.trial_data[trial]
-
-    def __len__(self):
-        return len(self.trials)
 # %%
 
 # task = "Knot_Tying"
@@ -140,15 +112,6 @@ class SegmentationDataset(Dataset):
 # d = next(iter(dl))
 # d['segment'].shape
 
-# %% Segmentation dataset test
-
-task = "Knot_Tying"
-datasetdir = "dataset"
-path = os.path.join(datasetdir, "Experimental_setup", task, "Balanced", "GestureClassification", "UserOut", "1_Out", "itr_1")
-train_txt = os.path.join(path, "Train.txt")
-ds = SegmentationDataset()
-ds[0].shape
-# %%
 
 
 # %%
