@@ -28,7 +28,6 @@ class SegmentationDataset(Dataset):
         for line in open(f"dataset/Experimental_setup/{self.task}/unBalanced/GestureRecognition/UserOut/{self.user_out}/itr_1/{self.mode}"):
             # line is:  "Knot_Tying_C001_000037_001227.txt  Knot_Tying_C001.txt"
             _, trial_key = line.split()
-            print(trial_key)
             trial_kinematic_data = self.trials_kinematic_data[trial_key]
             labels, mask = self.labels_and_mask(trial_kinematic_data, trial_key) 
 
