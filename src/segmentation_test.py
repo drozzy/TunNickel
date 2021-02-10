@@ -8,6 +8,8 @@ from segmentation_datamodule_louo import SegmentationDataModuleLouo
 import datetime
 from pytorch_lightning.callbacks import ModelCheckpoint
 import torch
+from pytorch_lightning.loggers import TensorBoardLogger
+
 
 dm = SegmentationDataModuleLouo(train_batch_size=1)
 # dm.prepare_data()
@@ -15,7 +17,10 @@ dm = SegmentationDataModuleLouo(train_batch_size=1)
 # dl = dm.train_dataloader()
 model = SegmentationLSTMModel()
 max_epochs = 200
-trainer = pl.Trainer(gpus=1, max_epochs=max_epochs)
+logger = TensorBoardLogger('tb_logs', name='SegLstm')
+trainer = pl.Trainer(gpus=1, max_epochs=max_epochs, logger=logger)
+
+
 trainer.fit(model, dm)
 
 # %% Test 

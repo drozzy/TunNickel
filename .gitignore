@@ -137,3 +137,4 @@ lightning_logs
 torchdyn
 TunNickel-src
 wandb
+tb_logs
