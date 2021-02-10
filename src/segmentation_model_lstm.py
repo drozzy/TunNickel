@@ -18,7 +18,8 @@ class SegmentationLSTMModel(pl.LightningModule):
         self.accuracy_test = pl.metrics.Accuracy()
         self.accuracy_val = pl.metrics.Accuracy()
 
-    def forward(self, xx_pad, x_lens):
+    def forward(self, batch):
+        (xx_pad, _yy_pad, x_lens, _y_lens, _xx_mask_pad) = batch
         xx_packed = pack(xx_pad, x_lens, batch_first=True, enforce_sorted=False)
         
         yy_pred_packed, _ = self.lstm(xx_packed)
@@ -30,14 +31,14 @@ class SegmentationLSTMModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         # x, y, xlens = batch
-        xx_pad, yy_pad, x_lens, y_lens, xx_mask_pad = batch
-        yy_pred = self(xx_pad, x_lens)
-        print(f"yy_pred shape: {yy_pred.shape}")
+        _xx_pad, yy_pad, _x_lens, _y_lens, xx_mask_pad = batch
+        yy_pred = self(batch)
+        # print(f"yy_pred shape: {yy_pred.shape}")
         yy_pred = yy_pred.reshape(-1, self.num_classes)
         yy_target = yy_pad.view(-1)
 
-        print(f"yy pred: {yy_pred.shape}")
-        print(f"yy_target: {yy_target.shape}")
+        # print(f"yy pred: {yy_pred.shape}")
+        # print(f"yy_target: {yy_target.shape}")
         loss = F.cross_entropy(yy_pred, yy_target)
         
         self.log('train_loss', loss)

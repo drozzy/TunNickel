@@ -23,10 +23,12 @@ def pad_collate(batch):
     return xx_pad, yy_pad, x_lens, y_lens, xx_mask_pad
 
 class SegmentationDataModuleLouo(pl.LightningDataModule):
-    def __init__(self, task="Knot_Tying", user_out="1_Out"):
+    def __init__(self, task="Knot_Tying", user_out="1_Out", train_batch_size=1, test_batch_size=8):
         super().__init__()
         self.task = task
         self.user_out = user_out        
+        self.train_batch_size = train_batch_size
+        self.test_batch_size=test_batch_size
     
     def setup(self, stage=None):
         self.train_dataset = SegmentationDataset(task=self.task, user_out=self.user_out, train=True)
@@ -37,13 +39,13 @@ class SegmentationDataModuleLouo(pl.LightningDataModule):
         self.test_dataset = SegmentationDataset(task=self.task, user_out=self.user_out, train=False)
         
     def train_dataloader(self):
-        return DataLoader(dataset=self.train_dataset, batch_size=32, shuffle=True, collate_fn=pad_collate)
+        return DataLoader(dataset=self.train_dataset, batch_size=self.train_batch_size, shuffle=True, collate_fn=pad_collate)
 
     def val_dataloader(self):
-        return DataLoader(dataset=self.val_dataset, batch_size=128, collate_fn=pad_collate)
+        return DataLoader(dataset=self.val_dataset, batch_size=self.test_batch_size, collate_fn=pad_collate)
 
     def test_dataloader(self):
-        return DataLoader(dataset=self.test_dataset, batch_size=128, collate_fn=pad_collate)
+        return DataLoader(dataset=self.test_dataset, batch_size=self.test_batch_size, collate_fn=pad_collate)
 # %%
 dm = SegmentationDataModuleLouo()
 dm.prepare_data()

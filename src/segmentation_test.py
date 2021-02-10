@@ -7,19 +7,16 @@ from segmentation_datamodule_louo import SegmentationDataModuleLouo
 # from pytorch_lightning.loggers import WandbLogger
 import datetime
 from pytorch_lightning.callbacks import ModelCheckpoint
+import torch
 
-
-
-data = SegmentationDataModuleLouo()
-data.prepare_data()
-data.setup()
+dm = SegmentationDataModuleLouo(train_batch_size=1)
+# dm.prepare_data()
+# dm.setup()
+# dl = dm.train_dataloader()
 model = SegmentationLSTMModel()
-
-EPOCHS = 10
-
-trainer = pl.Trainer(gpus=1, max_epochs=100)
-
-trainer.fit(model, data)
+max_epochs = 200
+trainer = pl.Trainer(gpus=1, max_epochs=max_epochs)
+trainer.fit(model, dm)
 
 # %% Test 
 #trainer.test(datamodule=data);
