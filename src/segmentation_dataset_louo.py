@@ -57,7 +57,8 @@ class SegmentationDataset(Dataset):
         path = f"dataset/{self.task}/transcriptions/{trial_name}"
         with open(path, 'r') as f:
             for line in f:
-                from_step, to_step, gesture, _ = line.split(' ')
+                from_step, to_step, gesture = line.strip().split(' ')
+                
                 from_step = int(from_step)
                 to_step = int(to_step)
 
@@ -75,12 +76,13 @@ class SegmentationDataset(Dataset):
 # datasetdir = "dataset"
 # path = os.path.join(datasetdir, "Experimental_setup", task, "Balanced", "GestureClassification", "UserOut", "1_Out", "itr_1")
 # train_txt = os.path.join(path, "Train.txt")
-ds = SegmentationDataset()
+
 # trial_data, labels, mask = ds[0]
 # print(trial_data.shape, labels.shape, mask.shape)
 # print(labels[84:99])
 # print(mask)
 # %%
-ds[0]
-ds.trial_keys
+# ds = SegmentationDataset(train=False)
+# ds[1]
+# ds.trial_keys
 # %%
