@@ -28,37 +28,40 @@ class SegmentationLSTMModel(pl.LightningModule):
 
         return yy_pred.permute(1, 0, 2)
 
-
+    def compute_loss(self, pred, target):
+        return F.cross_entropy(pred, target)
+        
     def training_step(self, batch, batch_idx):
-        # x, y, xlens = batch
         _xx_pad, yy_pad, _x_lens, _y_lens, xx_mask_pad = batch
         yy_pred = self(batch)
-        # print(f"yy_pred shape: {yy_pred.shape}")
+        
         yy_pred = yy_pred.reshape(-1, self.num_classes)
-        yy_target = yy_pad.view(-1)
-
-        # print(f"yy pred: {yy_pred.shape}")
-        # print(f"yy_target: {yy_target.shape}")
-        loss = F.cross_entropy(yy_pred, yy_target)
+        yy_pad = yy_pad.view(-1)
+        
+        loss = self.compute_loss(yy_pred, yy_pad)
         
         self.log('train_loss', loss)
-        self.log("train_acc_step", self.accuracy_train(yy_pred, yy_target))
+        self.log("train_acc_step", self.accuracy_train(yy_pred, yy_pad))
         return loss
 
     def training_epoch_end(self, outs):
         self.log("train_acc_epoch", self.accuracy_train.compute())
 
-    # def validation_step(self, batch, batch_idx):
-    #     x, y, xlens = batch
-    #     y_pred_logits = self(x)
-    #     loss = F.cross_entropy(y_pred_logits, y)
+    def validation_step(self, batch, batch_idx):
+        _xx_pad, yy_pad, _x_lens, _y_lens, xx_mask_pad = batch
+        yy_pred = self(batch)
         
-    #     self.log('val_loss', loss)
-    #     self.log("val_acc_step", self.accuracy_val(y_pred_logits, y))
-    #     return loss
+        yy_pred = yy_pred.reshape(-1, self.num_classes)
+        yy_pad = yy_pad.view(-1)
+        
+        loss = self.compute_loss(yy_pred, yy_pad)
+        
+        self.log('val_loss', loss)
+        self.log("val_acc_step", self.accuracy_val(yy_pred, yy_pad))
+        return loss
     
-    # def validation_epoch_end(self, outs):
-    #     self.log("val_acc_epoch", self.accuracy_val.compute(), prog_bar=True)
+    def validation_epoch_end(self, outs):
+        self.log("val_acc_epoch", self.accuracy_val.compute(), prog_bar=True)
 
     # def test_step(self, batch, batch_idx):
     #     x, y, xlens = batch
