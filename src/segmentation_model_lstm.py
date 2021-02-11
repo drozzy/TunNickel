@@ -28,20 +28,20 @@ class SegmentationLSTMModel(pl.LightningModule):
 
         return yy_pred.permute(1, 0, 2)
 
-    def compute_loss(self, pred, target):
-        return F.cross_entropy(pred, target)
-        
     def training_step(self, batch, batch_idx):
         _xx_pad, yy_pad, _x_lens, _y_lens, xx_mask_pad = batch
         yy_pred = self(batch)
+        yy_pad_masked = (yy_pad*xx_mask_pad) - 100*(1 - xx_mask_pad)
         
-        yy_pred = yy_pred.reshape(-1, self.num_classes)
-        yy_pad = yy_pad.view(-1)
+        yy_pred_cont = yy_pred.reshape(-1, self.num_classes)
+        yy_pad_cont = yy_pad_masked.view(-1)
         
-        loss = self.compute_loss(yy_pred, yy_pad)
+        loss = F.cross_entropy(yy_pred_cont, yy_pad_cont, ignore_index=-100)
+        
+        yy_pred_masked = yy_pred.argmax(dim=2) * xx_mask_pad
         
         self.log('train_loss', loss)
-        self.log("train_acc_step", self.accuracy_train(yy_pred, yy_pad))
+        self.log("train_acc_step", self.accuracy_train(yy_pred_masked, yy_pad_masked))
         return loss
 
     def training_epoch_end(self, outs):
@@ -50,14 +50,17 @@ class SegmentationLSTMModel(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         _xx_pad, yy_pad, _x_lens, _y_lens, xx_mask_pad = batch
         yy_pred = self(batch)
+        yy_pad_masked = (yy_pad*xx_mask_pad) - 100*(1 - xx_mask_pad)
         
-        yy_pred = yy_pred.reshape(-1, self.num_classes)
-        yy_pad = yy_pad.view(-1)
+        yy_pred_cont = yy_pred.reshape(-1, self.num_classes)
+        yy_pad_cont = yy_pad_masked.view(-1)
         
-        loss = self.compute_loss(yy_pred, yy_pad)
+        loss = F.cross_entropy(yy_pred_cont, yy_pad_cont, ignore_index=-100)
+        
+        yy_pred_masked = yy_pred.argmax(dim=2) * xx_mask_pad
         
         self.log('val_loss', loss)
-        self.log("val_acc_step", self.accuracy_val(yy_pred, yy_pad))
+        self.log("val_acc_step", self.accuracy_val(yy_pred_masked, yy_pad_masked))
         return loss
     
     def validation_epoch_end(self, outs):

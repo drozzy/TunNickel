@@ -16,7 +16,7 @@ dm = SegmentationDataModuleLouo(train_batch_size=1)
 # dm.setup()
 # dl = dm.train_dataloader()
 model = SegmentationLSTMModel()
-max_epochs = 200
+max_epochs = 500
 logger = TensorBoardLogger('tb_logs', name='SegLstm')
 trainer = pl.Trainer(gpus=1, max_epochs=max_epochs, logger=logger)
 
