@@ -12,3 +12,7 @@ TunNickel
     - Needle_Passing
     - Suturing
 ```
+
+
+## Vscode setup guide
+https://binx.io/blog/2020/03/05/setting-python-source-folders-vscode/

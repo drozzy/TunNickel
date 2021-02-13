@@ -105,21 +105,21 @@ def read_data_and_labels(trial_name):
 
     return kd[labeled_only_mask], labels[labeled_only_mask]
 
-# %%
-dd, lbl = read_data_and_labels("Suturing_B001.txt")
-lbl[78:82]
-dd.shape, lbl.shape
-# 80 219 G1 -> 79:219 
-# 220 370 G5 
-# %%
+# # %%
+# dd, lbl = read_data_and_labels("Suturing_B001.txt")
+# lbl[78:82]
+# dd.shape, lbl.shape
+# # 80 219 G1 -> 79:219 
+# # 220 370 G5 
+# # %%
 
-# %%
-# read_kinematic_data("Suturing_B001.txt")
-# read_transcription_data("Suturing_B001.txt").shape
+# # %%
+# # read_kinematic_data("Suturing_B001.txt")
+# # read_transcription_data("Suturing_B001.txt").shape
 
-# %%# %% 
-# %%
-lbl[79]
-(lbl != 0).shape
+# # %%# %% 
+# # %%
+# lbl[79]
+# (lbl != 0).shape
 
 # %%
