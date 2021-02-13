@@ -53,7 +53,7 @@ def trial_names_for_users(users):
     return sorted(trial_names)
 
 def read_kinematic_data(trial_name):
-    return genfromtxt(f"Suturing/kinematics/AllGestures/{trial_name}")
+    return genfromtxt(f"../Suturing/kinematics/AllGestures/{trial_name}")
 
 def read_transcription_data(trial_name):
     """ Read transcription data
@@ -66,7 +66,7 @@ def read_transcription_data(trial_name):
         the first two columns define the range and the last column 
         is a original integer label.
     """
-    return genfromtxt(f"Suturing/transcriptions/{trial_name}", dtype=np.int,
+    return genfromtxt(f"../Suturing/transcriptions/{trial_name}", dtype=np.int,
     converters={2:lambda g: int(g.decode('utf-8')[1:])})
 
 
@@ -105,21 +105,9 @@ def read_data_and_labels(trial_name):
 
     return kd[labeled_only_mask], labels[labeled_only_mask]
 
-# # %%
-# dd, lbl = read_data_and_labels("Suturing_B001.txt")
-# lbl[78:82]
-# dd.shape, lbl.shape
-# # 80 219 G1 -> 79:219 
-# # 220 370 G5 
-# # %%
-
-# # %%
-# # read_kinematic_data("Suturing_B001.txt")
+# %%
+read_kinematic_data("Suturing_B001.txt")
 # # read_transcription_data("Suturing_B001.txt").shape
 
-# # %%# %% 
-# # %%
-# lbl[79]
-# (lbl != 0).shape
-
+# read_data_and_labels("Suturing_B001.txt")
 # %%
