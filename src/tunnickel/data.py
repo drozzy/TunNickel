@@ -87,8 +87,8 @@ class TrialDataset(Dataset):
 
     def __getitem__(self, idx):
         trial = self.trials[idx]
-        x = read_kinematic_data(trial)
-        return x
+        x, y = read_data_and_labels(trial)
+        return x, y
 
 def read_data_and_labels(trial_name):
     """ Load data and labels.
