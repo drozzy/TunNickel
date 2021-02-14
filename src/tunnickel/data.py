@@ -91,6 +91,16 @@ class TrialDataset(Dataset):
         return x
 
 def read_data_and_labels(trial_name):
+    """ Load data and labels.
+
+    Args:
+        trial_name: A string.
+
+    Returns:
+        A tuple with the first element being the data
+        which is of the shape (seq_len, 76) and the second
+        element being the 0-based class labels of shape (seq_len,).
+    """
     kinematic_data = read_kinematic_data(trial_name)
     transcription_data = read_transcription_data(trial_name)
 
