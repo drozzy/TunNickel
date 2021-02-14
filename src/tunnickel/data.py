@@ -5,7 +5,6 @@ import os
 from numpy import genfromtxt
 import numpy as np
 from torch.utils.data import Dataset
-from importlib import resources
 
 USERS = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
 ORIG_LABEL_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -52,11 +51,18 @@ def trial_names_for_users(users):
             trial_names.append(trial_name(user, trial))
     return sorted(trial_names)
 
-def read_kinematic_data(trial_name):
-    with resources.path("tunnickel", f"Suturing") as path:
-        return genfromtxt(f"{path}/kinematics/AllGestures/{trial_name}")
+def read_kinematic_data(trial_name, trials_dir):
+    path = f"{trials_dir}/kinematics/AllGestures/{trial_name}"
+    path_binary = f"{path}.npy"
+    if os.path.exists(path_binary):
+        return np.load(path_binary)
+    else:
+        d = genfromtxt(path)
+        np.save(path, d)
+        return d
+        
 
-def read_transcription_data(trial_name):
+def read_transcription_data(trial_name, trials_dir):
     """ Read transcription data
  
      Args:
@@ -67,18 +73,26 @@ def read_transcription_data(trial_name):
         the first two columns define the range and the last column 
         is a original gesture id as an integer.
     """
-    with resources.path("tunnickel", f"Suturing") as path:
-        return genfromtxt(f"{path}/transcriptions/{trial_name}", dtype=np.int,
+    path = f"{trials_dir}/transcriptions/{trial_name}"
+    path_binary = f"{path}.npy"
+    if os.path.exists(path_binary):
+        return np.load(path_binary)
+    else:
+        d = genfromtxt(path, dtype=np.int,
             converters={2:lambda g: int(g.decode('utf-8')[1:])})
+        np.save(path, d)
+        return d
 
 
 class TrialDataset(Dataset):
-    def __init__(self, users):
+    def __init__(self, users, trials_dir="tunnickel/Suturing"):
         """ Create a dataset of trials corresponding to the given users.
 
         Args:
             users: A list of strings.
+            trials_dir: Path to the dir that contains trails. E.g. "Suturing"
         """
+        self.trials_dir = trials_dir
         self.users = users
         self.trials = trial_names_for_users(users)
 
@@ -87,10 +101,10 @@ class TrialDataset(Dataset):
 
     def __getitem__(self, idx):
         trial = self.trials[idx]
-        x, y = read_data_and_labels(trial)
+        x, y = read_data_and_labels(trial, self.trials_dir)
         return x, y
 
-def read_data_and_labels(trial_name):
+def read_data_and_labels(trial_name, trials_dir="Suturing"):
     """ Load data and labels.
 
     Args:
@@ -101,8 +115,8 @@ def read_data_and_labels(trial_name):
         which is of the shape (seq_len, 76) and the second
         element being the 0-based class labels of shape (seq_len,).
     """
-    kinematic_data = read_kinematic_data(trial_name)
-    transcription_data = read_transcription_data(trial_name)
+    kinematic_data = read_kinematic_data(trial_name, trials_dir)
+    transcription_data = read_transcription_data(trial_name, trials_dir)
 
     seq_len = kinematic_data.shape[0]
     frames = np.arange(1, seq_len+1, dtype=np.int)
@@ -123,4 +137,34 @@ def read_data_and_labels(trial_name):
 # # read_transcription_data("Suturing_B001.txt").shape
 
 # read_data_and_labels("Suturing_B001.txt")
+# %%
+# %%
+# %% 
+from torch.utils.data import DataLoader
+from torch.nn.utils.rnn import pad_sequence
+
+def pad_collate(batch):
+    xs = [torch.tensor(b[0], dtype=torch.float32) for b in batch]
+    ys = [torch.tensor(b[1], dtype=torch.int64) for b in batch]
+
+    xs_pad = pad_sequence(xs, batch_first=True)
+    ys_pad = pad_sequence(ys, batch_first=True)
+    xs_len = [len(x) for x in xs]
+    ys_len = [len(y) for y in ys]
+
+    return xs_pad, ys_pad, xs_len, ys_len
+
+# %%
+import torch
+d = TrialDataset(users=USERS, trials_dir="tunnickel/Suturing")
+
+dl = torch.utils.data.DataLoader(d, batch_size=3, collate_fn=pad_collate)
+# %%
+itt = iter(dl)
+# %%
+x,y,xl,yl =next(itt)
+x.shape
+
+# %%
+
 # %%
