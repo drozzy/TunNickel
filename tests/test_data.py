@@ -1,4 +1,4 @@
-from data import trial_name, trial_names_for_users, read_data_and_labels
+from tunnickel.data import trial_name, trial_names_for_users, read_data_and_labels
 
 def test_trial_name():
     assert trial_name("B", 1) == "Suturing_B001.txt"

@@ -5,6 +5,7 @@ import os
 from numpy import genfromtxt
 import numpy as np
 from torch.utils.data import Dataset
+from importlib import resources
 
 USERS = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
 ORIG_LABEL_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -53,7 +54,8 @@ def trial_names_for_users(users):
     return sorted(trial_names)
 
 def read_kinematic_data(trial_name):
-    return genfromtxt(f"../Suturing/kinematics/AllGestures/{trial_name}")
+    with resources.path("tunnickel", f"Suturing") as path:
+        return genfromtxt(f"{path}/kinematics/AllGestures/{trial_name}")
 
 def read_transcription_data(trial_name):
     """ Read transcription data
@@ -66,8 +68,9 @@ def read_transcription_data(trial_name):
         the first two columns define the range and the last column 
         is a original integer label.
     """
-    return genfromtxt(f"../Suturing/transcriptions/{trial_name}", dtype=np.int,
-    converters={2:lambda g: int(g.decode('utf-8')[1:])})
+    with resources.path("tunnickel", f"Suturing") as path:
+        return genfromtxt(f"{path}/transcriptions/{trial_name}", dtype=np.int,
+            converters={2:lambda g: int(g.decode('utf-8')[1:])})
 
 
 class TrialDataset(Dataset):
@@ -106,7 +109,7 @@ def read_data_and_labels(trial_name):
     return kd[labeled_only_mask], labels[labeled_only_mask]
 
 # %%
-read_kinematic_data("Suturing_B001.txt")
+# read_kinematic_data("Suturing_B001.txt")
 # # read_transcription_data("Suturing_B001.txt").shape
 
 # read_data_and_labels("Suturing_B001.txt")
