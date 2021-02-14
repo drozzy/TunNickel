@@ -1,10 +1,14 @@
 # %%
-# Method to read the data for all the tasks.
 from genericpath import exists
 import os
 from numpy import genfromtxt
 import numpy as np
 from torch.utils.data import Dataset
+import torch
+from torch.nn.utils.rnn import pad_sequence
+import pytorch_lightning as pl
+from torch.utils.data import DataLoader
+
 
 USERS = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
 ORIG_LABEL_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -132,39 +136,41 @@ def read_data_and_labels(trial_name, trials_dir="Suturing"):
     labels = gesture_ids[labeled_only_mask] - 1
     return kinematic_data[labeled_only_mask], labels
 
-# %%
-# read_kinematic_data("Suturing_B001.txt")
-# # read_transcription_data("Suturing_B001.txt").shape
-
-# read_data_and_labels("Suturing_B001.txt")
-# %%
-# %%
-# %% 
-from torch.utils.data import DataLoader
-from torch.nn.utils.rnn import pad_sequence
-
 def pad_collate(batch):
     xs = [torch.tensor(b[0], dtype=torch.float32) for b in batch]
     ys = [torch.tensor(b[1], dtype=torch.int64) for b in batch]
 
     xs_pad = pad_sequence(xs, batch_first=True)
     ys_pad = pad_sequence(ys, batch_first=True)
-    xs_len = [len(x) for x in xs]
-    ys_len = [len(y) for y in ys]
+    lens = [len(x) for x in xs]
+    
+    return xs_pad, ys_pad, lens
 
-    return xs_pad, ys_pad, xs_len, ys_len
+class TrialsDataModule(pl.LightningDataModule):
+    def __init__(self, trials_dir, test_users, train_batch_size=1, test_batch_size=8):
+        super().__init__()
+        assert type(test_users) == list
+        assert type(test_users[0]) == str
+        self.trials_dir = trials_dir
+        self.test_users = test_users  
+        self.train_users = [user for user in USERS if user not in test_users]
+             
+        self.train_batch_size = train_batch_size
+        self.test_batch_size=test_batch_size
+    
+    def setup(self, stage=None):
+        self.train_dataset = TrialDataset(self.train_users, self.trials_dir)
+        self.val_dataset = TrialDataset(self.test_users, self.trials_dir)
+        # Use the same dataset for testing - just to plot the best validation score
+        self.test_dataset = TrialDataset(self.test_users, self.trials_dir)
+        
+    def train_dataloader(self):
+        return DataLoader(dataset=self.train_dataset, batch_size=self.train_batch_size, shuffle=True, collate_fn=pad_collate)
 
-# %%
-import torch
-d = TrialDataset(users=USERS, trials_dir="tunnickel/Suturing")
+    def val_dataloader(self):
+        return DataLoader(dataset=self.val_dataset, batch_size=self.test_batch_size, collate_fn=pad_collate)
 
-dl = torch.utils.data.DataLoader(d, batch_size=3, collate_fn=pad_collate)
-# %%
-itt = iter(dl)
-# %%
-x,y,xl,yl =next(itt)
-x.shape
-
-# %%
+    def test_dataloader(self):
+        return DataLoader(dataset=self.test_dataset, batch_size=self.test_batch_size, collate_fn=pad_collate)
 
 # %%

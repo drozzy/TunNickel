@@ -1,5 +1,6 @@
-from tunnickel.data import trial_name, trial_names_for_users, read_data_and_labels, TrialDataset, USERS
+from tunnickel.data import trial_name, trial_names_for_users, read_data_and_labels, TrialDataset, USERS, pad_collate
 from importlib import resources
+import torch
 
 def test_trial_name():
     assert trial_name("B", 1) == "Suturing_B001.txt"
@@ -34,3 +35,13 @@ def test_trial_dataset_returns_correct_x_y_shapes():
         for x,y in d:
             assert x.shape[1] == 76
             assert y.shape[0] > 0
+
+def test_dataloader_with_dataset():
+    with resources.path("tunnickel", f"Suturing") as trials_dir:
+        batch_size = 3
+        d = TrialDataset(users=USERS, trials_dir=trials_dir)
+        dl = torch.utils.data.DataLoader(d, batch_size=batch_size, collate_fn=pad_collate)
+        itt = iter(dl)
+        x,y,lens =next(itt)
+        assert x.shape[0] == y.shape[0] == batch_size
+        assert len(lens) == batch_size
