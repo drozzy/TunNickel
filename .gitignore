@@ -129,7 +129,7 @@ dmypy.json
 
 
 tunnickel/dataset
-.vscode/settings.json
+# .vscode/settings.json
 .DS_Store
 cached
 lightning_logs
