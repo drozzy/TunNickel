@@ -9,7 +9,6 @@ from importlib import resources
 
 USERS = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
 ORIG_LABEL_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-NEW_LABEL_IDS  = [i-1 for i in ORIG_LABEL_IDS]
 LABELS = [f"G{i}" for i in ORIG_LABEL_IDS]
 NUM_LABELS = len(LABELS)
 
@@ -66,7 +65,7 @@ def read_transcription_data(trial_name):
     Returns:
         A 2-D NumPy array of shape (T, 3) where T is the time axis,
         the first two columns define the range and the last column 
-        is a original integer label.
+        is a original gesture id as an integer.
     """
     with resources.path("tunnickel", f"Suturing") as path:
         return genfromtxt(f"{path}/transcriptions/{trial_name}", dtype=np.int,
@@ -92,21 +91,22 @@ class TrialDataset(Dataset):
         return x
 
 def read_data_and_labels(trial_name):
-    kd = read_kinematic_data(trial_name)
-    td = read_transcription_data(trial_name)
+    kinematic_data = read_kinematic_data(trial_name)
+    transcription_data = read_transcription_data(trial_name)
 
-    seq_len = kd.shape[0]
+    seq_len = kinematic_data.shape[0]
     frames = np.arange(1, seq_len+1, dtype=np.int)
 
-    labels = np.zeros(frames.shape, dtype=np.int)
+    gesture_ids = np.zeros(frames.shape, dtype=np.int)
 
-    for start, end, label in td:
+    for start, end, gesture_id in transcription_data:
         to_label = (frames >= start) & (frames <= end)
-        labels[to_label] = label
+        gesture_ids[to_label] = gesture_id
     
-    labeled_only_mask = (labels != 0)
+    labeled_only_mask = (gesture_ids != 0)
 
-    return kd[labeled_only_mask], labels[labeled_only_mask]
+    labels = gesture_ids[labeled_only_mask] - 1
+    return kinematic_data[labeled_only_mask], labels
 
 # %%
 # read_kinematic_data("Suturing_B001.txt")

@@ -20,6 +20,8 @@ def test_trial_names_for_users():
 def test_read_data_and_labels():
     dd, lbl = read_data_and_labels("Suturing_B001.txt")
     x = 5635 - 79
+    assert min(lbl) == 0
+    assert max(lbl) == 10
     assert dd.shape == (x, 76)
     assert lbl.shape == (x,)
    
