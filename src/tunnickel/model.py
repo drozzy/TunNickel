@@ -34,10 +34,12 @@ class Module(pl.LightningModule):
         return self.get_loss(batch)
 
     def validation_step(self, batch, batch_idx):
-        return self.get_loss(batch)
+        loss = self.get_loss(batch)
+        self.log('val_loss', loss)
 
     def test_step(self, batch, batch_idx):
-        return self.get_loss(batch)
+        loss = self.get_loss(batch)
+        self.log('test_loss', loss)
     
     def get_loss(self, batch):
         x, target, lens = batch
@@ -51,4 +53,7 @@ class Module(pl.LightningModule):
         loss = F.cross_entropy(pred, target)
         return loss
 
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters())
+        return optimizer
 # %%
