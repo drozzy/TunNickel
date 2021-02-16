@@ -1,4 +1,4 @@
-from tunnickel.data import trial_name, trial_names_for_users, read_data_and_labels, TrialDataset, USERS, pad_collate
+from tunnickel.data import trial_name, trial_names_for_users, read_data_and_labels, TrialDataset, USERS, pad_collate, TrialsDataModule
 from importlib import resources
 import torch
 
@@ -41,6 +41,19 @@ def test_dataloader_with_dataset():
         batch_size = 3
         d = TrialDataset(users=USERS, trials_dir=trials_dir)
         dl = torch.utils.data.DataLoader(d, batch_size=batch_size, collate_fn=pad_collate)
+        itt = iter(dl)
+        x,y,lens =next(itt)
+        assert x.shape[0] == y.shape[0] == batch_size
+        assert len(lens) == batch_size
+
+def test_datamodule():
+    with resources.path("tunnickel", f"Suturing") as trials_dir:
+        batch_size = 3
+        dm = TrialsDataModule(trials_dir, test_users=[USERS[0]], train_batch_size=batch_size)
+        dm.prepare_data()
+        dm.setup(None)
+    
+        dl = dm.train_dataloader()
         itt = iter(dl)
         x,y,lens =next(itt)
         assert x.shape[0] == y.shape[0] == batch_size
