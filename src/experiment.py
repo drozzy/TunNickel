@@ -7,12 +7,14 @@ import torch.nn.functional as F
 from importlib import resources
 import torch
 from tunnickel.train import train
+import numpy as np
 
 MAX_EPOCHS = 1_000
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 PATIENCE = 100
 GPUS = 1
 NUM_WORKERS = 16
+
 # Goal: Run Neural ODE with skip connection experiment and beat the Multi-Task RNN 85.5%
 with resources.path("tunnickel", f"Suturing") as trials_dir:
     accuracies = []
@@ -23,8 +25,14 @@ with resources.path("tunnickel", f"Suturing") as trials_dir:
         acc = result['test_acc_epoch']
         accuracies.append(acc)
 
-print(f"Final Accuracy Was:")
+accuracy = 100*np.mean(accuracies)
+std      = 100*np.std(accuracies)
 
+summary = f"Final Accuracy: {accuracy}, Std: {std}"
+print(summary)
+
+with open('results.txt', 'w') as f:
+    f.write(summary)
 
 # trainer = Trainer(max_epochs=max_epochs)
 # mo = Module(num_features=76, num_classes=NUM_LABELS)
