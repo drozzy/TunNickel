@@ -43,6 +43,28 @@ class NeuralOdeModel(nn.Module):
          
         return x
 
+class ResNeuralOdeModel(nn.Module):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
+        super().__init__()
+        self.func = nn.Sequential(
+            nn.Conv1d(in_channels=num_features, out_channels=num_features, kernel_size=3, padding=1),
+            nn.Tanh()
+        )
+        self.neuralOde = NeuralODE(self.func)
+
+        self.final = nn.Linear(num_features, num_classes)
+
+
+    def forward(self, x):
+        x_orig = x
+        x = x.permute(0, 2, 1)
+        x = self.neuralOde(x)
+        x = x.permute(0, 2, 1)
+        x = (x + x_orig)/2.0
+        x = self.final(x)
+         
+        return x
+
 class Module(pl.LightningModule):
     def __init__(self, model):
         super().__init__()
