@@ -170,9 +170,11 @@ class TrialsDataModule(pl.LightningDataModule):
             shuffle=True, collate_fn=pad_collate, num_workers=self.num_workers)
 
     def val_dataloader(self):
-        return DataLoader(dataset=self.val_dataset, batch_size=self.test_batch_size, collate_fn=pad_collate)
+        return DataLoader(dataset=self.val_dataset, batch_size=self.test_batch_size, 
+            collate_fn=pad_collate, num_workers=self.num_workers)
 
     def test_dataloader(self):
-        return DataLoader(dataset=self.test_dataset, batch_size=self.test_batch_size, collate_fn=pad_collate)
+        return DataLoader(dataset=self.test_dataset, batch_size=self.test_batch_size, 
+            collate_fn=pad_collate, num_workers=self.num_workers)
 
 # %%
