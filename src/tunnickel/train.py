@@ -7,8 +7,23 @@ import torch.nn.functional as F
 from importlib import resources
 import torch
 
-def train(test_users, max_epochs, trials_dir, batch_size = 3):    
-    trainer = Trainer(max_epochs=max_epochs)
+def create_trainer(patience, max_epochs, gpus):
+    early_stop_callback = EarlyStopping(
+        monitor='val_acc_epoch',
+        patience=patience,
+        mode='max'
+    )
+    checkpoint_callback = ModelCheckpoint(
+        save_top_k=1,
+        monitor='val_acc_epoch',
+        mode='max'
+    )
+    trainer = pl.Trainer(gpus=gpus, max_epochs=max_epochs, 
+        callbacks=[early_stop_callback, checkpoint_callback])
+    return trainer
+    
+def train(test_users, max_epochs, trials_dir, batch_size = 3, patience=100, gpus):    
+    trainer = create_trainer(patience, max_epochs, gpus)
     mo = Module(num_features=76, num_classes=NUM_LABELS)
     
     dm = TrialsDataModule(trials_dir, test_users=test_users, train_batch_size=batch_size)
