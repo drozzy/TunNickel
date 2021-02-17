@@ -106,7 +106,11 @@ class TrialDataset(Dataset):
     def __getitem__(self, idx):
         trial = self.trials[idx]
         x, y = read_data_and_labels(trial, self.trials_dir)
+        x, y = downsample(x, y, factor=6)
         return x, y
+
+def downsample(x, y, factor=6):
+    return x[::factor, :], y[::factor]
 
 def read_data_and_labels(trial_name, trials_dir="Suturing"):
     """ Load data and labels.

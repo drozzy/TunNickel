@@ -18,4 +18,4 @@ def test_model_and_data_module_before_train():
         dm.setup(None)
     
         result = trainer.test(mo, datamodule=dm)
-        assert result == [{}]
+        assert type(result[0]) == dict

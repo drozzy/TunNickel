@@ -1,4 +1,6 @@
-from tunnickel.data import trial_name, trial_names_for_users, read_data_and_labels, TrialDataset, USERS, pad_collate, TrialsDataModule
+from tunnickel.data import (trial_name, trial_names_for_users, 
+    read_data_and_labels, TrialDataset, 
+    USERS, pad_collate, TrialsDataModule, downsample)
 from importlib import resources
 import torch
 
@@ -27,6 +29,18 @@ def test_read_data_and_labels_return_correct_data_shape():
         assert max(lbl) == 10
         assert dd.shape == (x, 76)
         assert lbl.shape == (x,)
+
+def test_downsample():
+    with resources.path("tunnickel", f"Suturing") as trials_dir:
+        xs, ys = read_data_and_labels("Suturing_B001.txt", trials_dir)
+        
+        total = 5635 - 79 
+        
+        xd, yd = downsample(xs, ys, factor=6)
+
+        assert xd.shape == (int(total/6), 76)
+        assert yd.shape == (int(total/6),)
+
 
 def test_trial_dataset_returns_correct_x_y_shapes():
     with resources.path("tunnickel", f"Suturing") as trials_dir:
