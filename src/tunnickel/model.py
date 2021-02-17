@@ -43,6 +43,31 @@ class NeuralOdeModel(nn.Module):
          
         return x
 
+class PlainNeuralOdeModel(nn.Module):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
+        super().__init__()
+        self.func = nn.Sequential(
+            nn.Conv1d(in_channels=num_features, out_channels=num_features, kernel_size=3, padding=1),
+            nn.Tanh()
+        )
+        self.neuralOde = NeuralODE(self.func)
+
+        self.m = nn.Sequential(
+            self.neuralOde
+        )
+        self.penultimate = nn.Linear(num_features, hidden_size)
+        self.final = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        x = x.permute(0, 2, 1)
+        x = self.m(x)
+        x = x.permute(0, 2, 1)
+        x = torch.relu(self.penultimate(x))
+
+        x = self.final(x)
+         
+        return x
+
 class AugNeuralOdeModel(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
