@@ -44,12 +44,13 @@ class NeuralOdeModel(nn.Module):
         return x
 
 class ResNeuralOdeModel(nn.Module):
-    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32, skip_weight=0.1):
         super().__init__()
         self.func = nn.Sequential(
             nn.Conv1d(in_channels=num_features, out_channels=num_features, kernel_size=3, padding=1),
             nn.Tanh()
         )
+        self.skip_weight = skip_weight
         self.neuralOde = NeuralODE(self.func)
 
         self.final = nn.Linear(num_features, num_classes)
@@ -60,7 +61,7 @@ class ResNeuralOdeModel(nn.Module):
         x = x.permute(0, 2, 1)
         x = self.neuralOde(x)
         x = x.permute(0, 2, 1)
-        x = (x + x_orig)/2.0
+        x = x + self.skip_weight*x_orig
         x = self.final(x)
          
         return x
