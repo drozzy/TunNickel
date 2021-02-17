@@ -26,21 +26,39 @@ class Module(pl.LightningModule):
         super().__init__()
         self.model = Model(num_features, num_classes)
 
+        self.accuracy_train = pl.metrics.Accuracy()
+        self.accuracy_test = pl.metrics.Accuracy()
+        self.accuracy_val = pl.metrics.Accuracy()
+
     def forward(self, x):
         y = self.model(x)
         return y
     
     def training_step(self, batch, batch_idx):
-        return self.get_loss(batch)
+        loss, pred, target = self.get_loss(batch)
+        self.log("train_acc_step", self.accuracy_train(pred, target))
+
+        return loss
+
+    def training_epoch_end(self, outs):
+        self.log("train_acc_epoch", self.accuracy_train.compute())
 
     def validation_step(self, batch, batch_idx):
-        loss = self.get_loss(batch)
+        loss, pred, target = self.get_loss(batch)
         self.log('val_loss', loss)
+        self.log("val_acc_step", self.accuracy_val(pred, target))
+
+    def validation_epoch_end(self, outs):
+        self.log("val_acc_epoch", self.accuracy_val.compute(), prog_bar=True)
 
     def test_step(self, batch, batch_idx):
-        loss = self.get_loss(batch)
+        loss, pred, target = self.get_loss(batch)
         self.log('test_loss', loss)
-    
+        self.log("test_acc_step", self.accuracy_test(pred, target))
+
+    def test_epoch_end(self, outs):
+        self.log("test_acc_epoch", self.accuracy_test.compute(), prog_bar=True)
+        
     def get_loss(self, batch):
         x, target, lens = batch
         b, s = x.shape[0], x.shape[1]
@@ -49,9 +67,9 @@ class Module(pl.LightningModule):
         pred = pred.reshape(b*s, -1)    # batch*seq_len, classes
 
         target = target.reshape(-1)     # batch x seq_len -> batch*seq_len
-        
+
         loss = F.cross_entropy(pred, target)
-        return loss
+        return loss, pred, target
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters())

@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from importlib import resources
 import torch
 
-def train_with_users(test_users, max_epochs, trials_dir, batch_size = 3):    
+def train(test_users, max_epochs, trials_dir, batch_size = 3):    
     trainer = Trainer(max_epochs=max_epochs)
     mo = Module(num_features=76, num_classes=NUM_LABELS)
     
@@ -15,7 +15,8 @@ def train_with_users(test_users, max_epochs, trials_dir, batch_size = 3):
 
     result = trainer.fit(mo, datamodule=dm)
 
-    trainer.test()
+    result = trainer.test()
+    # return result['test_acc']
 # %%
 # from tunnickel.model import Model, Module
 # from importlib import resources
