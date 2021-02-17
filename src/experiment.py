@@ -1,5 +1,5 @@
 # %% 
-from tunnickel.model import Model, Module
+from tunnickel.model import LstmModel, Module
 from tunnickel.data import TrialsDataModule, USERS, NUM_LABELS
 import torch
 from pytorch_lightning import Trainer
@@ -14,12 +14,13 @@ BATCH_SIZE = 32
 PATIENCE = 200
 GPUS = 1
 NUM_WORKERS = 16
+MODEL = LstmModel(num_features=76, num_classes=NUM_LABELS)
 
 # Goal: Run Neural ODE with skip connection experiment and beat the Multi-Task RNN 85.5%
 with resources.path("tunnickel", f"Suturing") as trials_dir:
     accuracies = []
     for user_out in USERS:
-        result = train(test_users=[user_out], max_epochs=MAX_EPOCHS, 
+        result = train(test_users=[user_out], model=MODEL, max_epochs=MAX_EPOCHS, 
             trials_dir=trials_dir, batch_size=BATCH_SIZE, patience=PATIENCE, 
             gpus=GPUS, num_workers=NUM_WORKERS)
         acc = result['test_acc_epoch']

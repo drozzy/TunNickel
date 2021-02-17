@@ -1,5 +1,5 @@
 # %%
-from tunnickel.model import Model, Module
+from tunnickel.model import Module
 from tunnickel.data import TrialsDataModule, USERS, NUM_LABELS
 import torch
 from pytorch_lightning import Trainer
@@ -26,9 +26,9 @@ def create_trainer(patience, max_epochs, gpus):
         callbacks=[early_stop_callback, checkpoint_callback])
     return trainer
     
-def train(test_users, max_epochs, trials_dir, batch_size = 3, patience=100, gpus=0, num_workers=0):    
+def train(test_users, model, max_epochs, trials_dir, batch_size = 3, patience=100, gpus=0, num_workers=0):    
     trainer = create_trainer(patience, max_epochs, gpus)
-    mo = Module(num_features=76, num_classes=NUM_LABELS)
+    mo = Module(model=model)
     
     dm = TrialsDataModule(trials_dir, test_users=test_users, train_batch_size=batch_size,
         num_workers=num_workers)

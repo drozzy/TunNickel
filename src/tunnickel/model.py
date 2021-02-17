@@ -9,7 +9,7 @@ from tunnickel.data import NUM_LABELS
 # %%
 import torch.nn.functional as F
 
-class Model(nn.Module):
+class LstmModel(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         self.lstm = nn.LSTM(input_size=num_features, 
@@ -22,9 +22,9 @@ class Model(nn.Module):
         return out
 
 class Module(pl.LightningModule):
-    def __init__(self, num_features=76, num_classes=NUM_LABELS, lr=0.001):
+    def __init__(self, model):
         super().__init__()
-        self.model = Model(num_features, num_classes)
+        self.model = model
 
         self.accuracy_train = pl.metrics.Accuracy()
         self.accuracy_test = pl.metrics.Accuracy()
