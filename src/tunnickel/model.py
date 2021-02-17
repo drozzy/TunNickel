@@ -6,6 +6,8 @@ import torch
 from torch.nn.utils.rnn import pack_padded_sequence as pack
 from torch.nn.utils.rnn import pad_packed_sequence as unpack
 from tunnickel.data import NUM_LABELS
+from torchdyn.models import *
+from torchdyn import *
 # %%
 import torch.nn.functional as F
 
@@ -20,6 +22,26 @@ class LstmModel(nn.Module):
         out, _ = self.lstm(x)
         out = self.linear(out)
         return out
+
+class NeuralOdeModel(nn.Module):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
+        super().__init__()
+        self.func = nn.Sequential(
+            nn.Conv1d(in_channels=num_features, out_channels=num_features, kernel_size=3, padding=1),
+            nn.Tanh()
+        )
+        self.neuralOde = NeuralODE(self.func)
+
+        self.final = nn.Linear(num_features, num_classes)
+
+
+    def forward(self, x):
+        x = x.permute(0, 2, 1)
+        x = self.neuralOde(x)
+        x = x.permute(0, 2, 1)
+        x = self.final(x)
+         
+        return x
 
 class Module(pl.LightningModule):
     def __init__(self, model):

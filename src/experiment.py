@@ -1,5 +1,5 @@
 # %% 
-from tunnickel.model import LstmModel, Module
+from tunnickel.model import LstmModel, Module, NeuralOdeModel
 from tunnickel.data import TrialsDataModule, USERS, NUM_LABELS
 import torch
 from pytorch_lightning import Trainer
@@ -14,7 +14,8 @@ BATCH_SIZE = 32
 PATIENCE = 200
 GPUS = 1
 NUM_WORKERS = 16
-MODEL = LstmModel(num_features=76, num_classes=NUM_LABELS)
+# MODEL = LstmModel(num_features=76, num_classes=NUM_LABELS)
+MODEL = NeuralOdeModel(num_features=76, num_classes=NUM_LABELS)
 
 # Goal: Run Neural ODE with skip connection experiment and beat the Multi-Task RNN 85.5%
 with resources.path("tunnickel", f"Suturing") as trials_dir:
