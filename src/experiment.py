@@ -9,12 +9,12 @@ import torch
 from tunnickel.train import train
 import numpy as np
 
-MAX_EPOCHS = 1_000
+MAX_EPOCHS = 10_000
 BATCH_SIZE = 32
-PATIENCE = 200
+PATIENCE = 500
 GPUS = 1
 NUM_WORKERS = 16
-DOWNSAMPLE_FACTOR = 6
+DOWNSAMPLE_FACTOR = 1 # 6
 # MODEL = LstmModel(num_features=76, num_classes=NUM_LABELS)
 MODEL = NeuralOdeModel(num_features=76, num_classes=NUM_LABELS)
 
