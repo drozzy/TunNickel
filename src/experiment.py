@@ -11,7 +11,7 @@ import numpy as np
 
 MAX_EPOCHS = 1_000
 BATCH_SIZE = 32
-PATIENCE = 100
+PATIENCE = 200
 GPUS = 1
 NUM_WORKERS = 16
 
