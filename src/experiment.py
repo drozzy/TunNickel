@@ -9,17 +9,17 @@ import torch
 from tunnickel.train import train
 
 MAX_EPOCHS = 1_000
-BATCH_SIZE = 2
+BATCH_SIZE = 16
 PATIENCE = 100
 GPUS = 1
-
+NUM_WORKERS = 16
 # Goal: Run Neural ODE with skip connection experiment and beat the Multi-Task RNN 85.5%
 with resources.path("tunnickel", f"Suturing") as trials_dir:
     accuracies = []
     for user_out in USERS:
         result = train(test_users=[user_out], max_epochs=MAX_EPOCHS, 
             trials_dir=trials_dir, batch_size=BATCH_SIZE, patience=PATIENCE, 
-            gpus=GPUS)
+            gpus=GPUS, num_workers=NUM_WORKERS)
         acc = result['test_acc_epoch']
         accuracies.append(acc)
 

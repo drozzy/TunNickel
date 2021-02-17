@@ -147,12 +147,13 @@ def pad_collate(batch):
     return xs_pad, ys_pad, lens
 
 class TrialsDataModule(pl.LightningDataModule):
-    def __init__(self, trials_dir, test_users, train_batch_size=1, test_batch_size=8):
+    def __init__(self, trials_dir, test_users, train_batch_size=1, test_batch_size=8, num_workers=0):
         super().__init__()
         assert type(test_users) == list
         assert type(test_users[0]) == str
         self.trials_dir = trials_dir
         self.test_users = test_users  
+        self.num_workers = num_workers
         self.train_users = [user for user in USERS if user not in test_users]
              
         self.train_batch_size = train_batch_size
@@ -165,7 +166,8 @@ class TrialsDataModule(pl.LightningDataModule):
         self.test_dataset = TrialDataset(self.test_users, self.trials_dir)
         
     def train_dataloader(self):
-        return DataLoader(dataset=self.train_dataset, batch_size=self.train_batch_size, shuffle=True, collate_fn=pad_collate)
+        return DataLoader(dataset=self.train_dataset, batch_size=self.train_batch_size, 
+            shuffle=True, collate_fn=pad_collate, num_workers=self.num_workers)
 
     def val_dataloader(self):
         return DataLoader(dataset=self.val_dataset, batch_size=self.test_batch_size, collate_fn=pad_collate)
