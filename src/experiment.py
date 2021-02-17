@@ -11,7 +11,7 @@ from tunnickel.train import train
 MAX_EPOCHS = 1_000
 BATCH_SIZE = 2
 PATIENCE = 100
-GPUS = 0
+GPUS = 1
 
 # Goal: Run Neural ODE with skip connection experiment and beat the Multi-Task RNN 85.5%
 with resources.path("tunnickel", f"Suturing") as trials_dir:
