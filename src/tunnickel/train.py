@@ -16,6 +16,7 @@ def train(test_users, max_epochs, trials_dir, batch_size = 3):
     result = trainer.fit(mo, datamodule=dm)
 
     result = trainer.test()
+    return result[0]
     # return result['test_acc']
 # %%
 # from tunnickel.model import Model, Module
