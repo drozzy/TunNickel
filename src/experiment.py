@@ -14,6 +14,7 @@ BATCH_SIZE = 32
 PATIENCE = 200
 GPUS = 1
 NUM_WORKERS = 16
+DOWNSAMPLE_FACTOR = 6
 # MODEL = LstmModel(num_features=76, num_classes=NUM_LABELS)
 MODEL = NeuralOdeModel(num_features=76, num_classes=NUM_LABELS)
 
@@ -23,7 +24,7 @@ with resources.path("tunnickel", f"Suturing") as trials_dir:
     for user_out in USERS:
         result = train(test_users=[user_out], model=MODEL, max_epochs=MAX_EPOCHS, 
             trials_dir=trials_dir, batch_size=BATCH_SIZE, patience=PATIENCE, 
-            gpus=GPUS, num_workers=NUM_WORKERS)
+            gpus=GPUS, num_workers=NUM_WORKERS, downsample_factor=DOWNSAMPLE_FACTOR)
         acc = result['test_acc_epoch']
         accuracies.append(acc)
 

@@ -26,12 +26,12 @@ def create_trainer(patience, max_epochs, gpus):
         callbacks=[early_stop_callback, checkpoint_callback])
     return trainer
     
-def train(test_users, model, max_epochs, trials_dir, batch_size = 3, patience=100, gpus=0, num_workers=0):    
+def train(test_users, model, max_epochs, trials_dir, batch_size = 3, patience=100, gpus=0, num_workers=0, downsample_factor=6):    
     trainer = create_trainer(patience, max_epochs, gpus)
     mo = Module(model=model)
     
     dm = TrialsDataModule(trials_dir, test_users=test_users, train_batch_size=batch_size,
-        num_workers=num_workers)
+        num_workers=num_workers, downsample_factor=downsample_factor)
 
     result = trainer.fit(mo, datamodule=dm)
 

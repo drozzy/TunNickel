@@ -89,7 +89,7 @@ def read_transcription_data(trial_name, trials_dir):
 
 
 class TrialDataset(Dataset):
-    def __init__(self, users, trials_dir="tunnickel/Suturing"):
+    def __init__(self, users, trials_dir="tunnickel/Suturing", downsample_factor=6):
         """ Create a dataset of trials corresponding to the given users.
 
         Args:
@@ -99,6 +99,7 @@ class TrialDataset(Dataset):
         self.trials_dir = trials_dir
         self.users = users
         self.trials = trial_names_for_users(users)
+        self.df = downsample_factor
 
     def __len__(self):
         return len(self.trials)
@@ -106,7 +107,7 @@ class TrialDataset(Dataset):
     def __getitem__(self, idx):
         trial = self.trials[idx]
         x, y = read_data_and_labels(trial, self.trials_dir)
-        x, y = downsample(x, y, factor=6)
+        x, y = downsample(x, y, factor=self.df)
         return x, y
 
 def downsample(x, y, factor=6):
@@ -151,34 +152,35 @@ def pad_collate(batch):
     return xs_pad, ys_pad, lens
 
 class TrialsDataModule(pl.LightningDataModule):
-    def __init__(self, trials_dir, test_users, train_batch_size=1, test_batch_size=8, num_workers=0):
+    def __init__(self, trials_dir, test_users, train_batch_size=1, test_batch_size=8, num_workers=0, downsample_factor=6):
         super().__init__()
         assert type(test_users) == list
         assert type(test_users[0]) == str
         self.trials_dir = trials_dir
         self.test_users = test_users  
-        self.num_workers = num_workers
+        self.nw = num_workers
         self.train_users = [user for user in USERS if user not in test_users]
+        self.df = downsample_factor
              
-        self.train_batch_size = train_batch_size
-        self.test_batch_size=test_batch_size
+        self.train_bs = train_batch_size
+        self.test_bs = test_batch_size
     
     def setup(self, stage=None):
-        self.train_dataset = TrialDataset(self.train_users, self.trials_dir)
-        self.val_dataset = TrialDataset(self.test_users, self.trials_dir)
+        self.train_d = TrialDataset(self.train_users, self.trials_dir, self.df)
+        self.val_d = TrialDataset(self.test_users, self.trials_dir, self.df)
         # Use the same dataset for testing - just to plot the best validation score
-        self.test_dataset = TrialDataset(self.test_users, self.trials_dir)
+        self.test_d = TrialDataset(self.test_users, self.trials_dir, self.df)
         
     def train_dataloader(self):
-        return DataLoader(dataset=self.train_dataset, batch_size=self.train_batch_size, 
-            shuffle=True, collate_fn=pad_collate, num_workers=self.num_workers)
+        return DataLoader(dataset=self.train_d, batch_size=self.train_bs, 
+            shuffle=True, collate_fn=pad_collate, num_workers=self.nw)
 
     def val_dataloader(self):
-        return DataLoader(dataset=self.val_dataset, batch_size=self.test_batch_size, 
-            collate_fn=pad_collate, num_workers=self.num_workers)
+        return DataLoader(dataset=self.val_d, batch_size=self.test_bs, 
+            collate_fn=pad_collate, num_workers=self.nw)
 
     def test_dataloader(self):
-        return DataLoader(dataset=self.test_dataset, batch_size=self.test_batch_size, 
-            collate_fn=pad_collate, num_workers=self.num_workers)
+        return DataLoader(dataset=self.test_d, batch_size=self.test_bs, 
+            collate_fn=pad_collate, num_workers=self.nw)
 
 # %%
