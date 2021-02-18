@@ -23,26 +23,6 @@ class LstmModel(nn.Module):
         out = self.linear(out)
         return out
 
-class NeuralOdeModel(nn.Module):
-    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
-        super().__init__()
-        self.func = nn.Sequential(
-            nn.Conv1d(in_channels=num_features, out_channels=num_features, kernel_size=3, padding=1),
-            nn.Tanh()
-        )
-        self.neuralOde = NeuralODE(self.func)
-
-        self.final = nn.Linear(num_features, num_classes)
-
-
-    def forward(self, x):
-        x = x.permute(0, 2, 1)
-        x = self.neuralOde(x)
-        x = x.permute(0, 2, 1)
-        x = self.final(x)
-         
-        return x
-
 class PlainNeuralOdeModel(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
@@ -97,6 +77,35 @@ class AugNeuralOdeModel(nn.Module):
         return x
 
 class ResNeuralOdeModel(nn.Module):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32, skip_weight=0.1):
+        super().__init__()
+        self.func = nn.Sequential(
+            nn.Conv1d(in_channels=num_features, out_channels=num_features, kernel_size=3, padding=1),
+            nn.Tanh()
+        )
+        self.skip_weight = skip_weight
+        self.neuralOde = NeuralODE(self.func)
+
+        self.m = nn.Sequential(
+            self.neuralOde
+        )
+        self.penultimate = nn.Linear(num_features, hidden_size)
+        self.final = nn.Linear(hidden_size, num_classes)
+
+
+    def forward(self, x):
+        x_orig = x
+        x = x.permute(0, 2, 1)
+        x = self.m(x)
+        x = x.permute(0, 2, 1)
+        x = x + self.skip_weight*x_orig
+        x = torch.relu(self.penultimate(x))
+
+        x = self.final(x)
+         
+        return x
+
+class ResAugNeuralOdeModel(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32, skip_weight=0.1):
         super().__init__()
         aug_dims = 8
