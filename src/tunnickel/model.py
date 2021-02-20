@@ -11,17 +11,17 @@ from torchdyn import *
 # %%
 import torch.nn.functional as F
 
-class LstmModel(nn.Module):
-    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
-        super().__init__()
-        self.lstm = nn.LSTM(input_size=num_features, 
-            hidden_size=hidden_size, batch_first=True)
-        self.linear = nn.Linear(hidden_size, num_classes)
+# class LstmModel(nn.Module):
+#     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
+#         super().__init__()
+#         self.lstm = nn.LSTM(input_size=num_features, 
+#             hidden_size=hidden_size, batch_first=True)
+#         self.linear = nn.Linear(hidden_size, num_classes)
 
-    def forward(self, x):
-        out, _ = self.lstm(x)
-        out = self.linear(out)
-        return out
+#     def forward(self, x):
+#         out, _ = self.lstm(x)
+#         out = self.linear(out)
+#         return out
 
 class LstmField(nn.Module):
     def __init__(self, num_features):
@@ -32,6 +32,20 @@ class LstmField(nn.Module):
     def forward(self, x):        
         y, _ = self.func(x)
         return y
+
+class LstmModel(nn.Module):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
+        super().__init__()
+        self.m = LstmField(num_features=num_features)
+        self.penultimate = nn.Linear(num_features, hidden_size)
+        self.final = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        x = self.m(x)
+        x = torch.relu(self.penultimate(x))
+        x = self.final(x)
+         
+        return x
 
 class LstmNeuralOdeModel(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
