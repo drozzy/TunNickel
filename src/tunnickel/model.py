@@ -74,6 +74,31 @@ class LstmResNeuralOdeModel(nn.Module):
          
         return x
 
+class LstmResAugNeuralOdeModel(nn.Module):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
+        super().__init__()
+        aug_dims = 8
+        self.func = LstmField(num_features=num_features+aug_dims)
+        self.neuralOde = NeuralODE(self.func)
+
+        self.m = nn.Sequential(
+            Augmenter(augment_dims=aug_dims, augment_idx=2),
+            self.neuralOde
+        )
+        self.skip_aug = Augmenter(augment_dims=aug_dims, augment_idx=2)
+
+        self.penultimate = nn.Linear(num_features+aug_dims, hidden_size)
+        self.final = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        x_orig = x
+        x = self.m(x)
+        x = x + self.skip_aug(x_orig)
+        x = torch.relu(self.penultimate(x))
+        x = self.final(x)
+         
+        return x
+
 class PlainNeuralOdeModel(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
