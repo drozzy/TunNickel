@@ -2,7 +2,7 @@
 from tunnickel.model import Module
 from tunnickel.data import TrialsDataModule, USERS, NUM_LABELS
 import torch
-from pytorch_lightning import Trainer
+from pytorch_lightning import Trainer, seed_everything
 import torch.nn.functional as F
 from importlib import resources
 import torch
@@ -10,6 +10,8 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.callbacks import ModelCheckpoint
 
+# sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
+seed_everything(42)
 
 def create_trainer(patience, max_epochs, gpus):
     early_stop_callback = EarlyStopping(
@@ -22,7 +24,8 @@ def create_trainer(patience, max_epochs, gpus):
         monitor='val_acc_epoch',
         mode='max'
     )
-    trainer = pl.Trainer(gpus=gpus, max_epochs=max_epochs, 
+
+    trainer = pl.Trainer(deterministic=True, gpus=gpus, max_epochs=max_epochs, 
         callbacks=[early_stop_callback, checkpoint_callback])
     return trainer
     

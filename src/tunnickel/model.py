@@ -47,6 +47,19 @@ class LstmModel(nn.Module):
          
         return x
 
+class LinearModel(nn.Module):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
+        super().__init__()
+        self.m = nn.Linear(num_features, num_features)
+        self.penultimate = nn.Linear(num_features, hidden_size)
+        self.final = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        x = self.m(x)
+        x = torch.relu(self.penultimate(x))
+        x = self.final(x)
+         
+        return x
 class LstmNeuralOdeModel(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
