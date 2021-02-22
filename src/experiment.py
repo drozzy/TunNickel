@@ -1,5 +1,5 @@
 # %% 
-from tunnickel.model import LinearModel, LstmModel, Module, ResNeuralOdeModel, ResAugNeuralOdeModel, AugNeuralOdeModel, PlainNeuralOdeModel, LstmNeuralOdeModel, LstmResNeuralOdeModel, LstmResAugNeuralOdeModel, LstmAugNeuralOdeModel
+from tunnickel.model import LinearNeuralOdeModel, LinearModel, LstmModel, Module, ResNeuralOdeModel, ResAugNeuralOdeModel, AugNeuralOdeModel, PlainNeuralOdeModel, LstmNeuralOdeModel, LstmResNeuralOdeModel, LstmResAugNeuralOdeModel, LstmAugNeuralOdeModel
 from tunnickel.data import TrialsDataModule, USERS, NUM_LABELS
 import torch
 from pytorch_lightning import Trainer
@@ -22,7 +22,12 @@ DOWNSAMPLE_FACTOR = 6
 # MODEL = LstmResAugNeuralOdeModel(num_features=76, num_classes=NUM_LABELS, hidden_size=32)
 # MODEL = LstmModel(num_features=76, num_classes=NUM_LABELS, hidden_size=32)
 # MODEL = LstmAugNeuralOdeModel(num_features=76, num_classes=NUM_LABELS, hidden_size=32)
+# MODEL = LinearModel(num_features=76, num_classes=NUM_LABELS, hidden_size=32)
+# MODEL = LinearNeuralOdeModel(num_features=76, num_classes=NUM_LABELS, hidden_size=32)
+# More integration points along the way
+# MODEL = LstmNeuralOdeModel(num_features=76, num_classes=NUM_LABELS, hidden_size=32, s_span=torch.linspace(0, 1, 10))
 MODEL = LinearModel(num_features=76, num_classes=NUM_LABELS, hidden_size=32)
+
 # Goal: Run Neural ODE with skip connection experiment and beat the Multi-Task RNN 85.5%
 with resources.path("tunnickel", f"Suturing") as trials_dir:
     accuracies = []

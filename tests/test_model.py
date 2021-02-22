@@ -1,4 +1,4 @@
-from tunnickel.model import LstmModel, NeuralOdeModel, Module
+from tunnickel.model import LstmModel, LstmNeuralOdeModel, Module
 from importlib import resources
 import torch
 import torch.nn.functional as F
@@ -10,7 +10,7 @@ def test_neural_ode_model_forward():
     seq_len = 7
     input_size = 5
     num_classes = 10
-    m = NeuralOdeModel(num_classes=num_classes, num_features=input_size)
+    m = LstmNeuralOdeModel(num_classes=num_classes, num_features=input_size)
     
     x = torch.rand((batch, seq_len, input_size))
     assert x.shape[0] == batch

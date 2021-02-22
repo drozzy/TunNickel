@@ -60,11 +60,28 @@ class LinearModel(nn.Module):
         x = self.final(x)
          
         return x
-class LstmNeuralOdeModel(nn.Module):
+
+class LinearNeuralOdeModel(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
-        self.func = LstmField(num_features=num_features)
+        self.func = nn.Linear(in_features=num_features, out_features=num_features)
         self.neuralOde = NeuralODE(self.func)
+
+        self.penultimate = nn.Linear(num_features, hidden_size)
+        self.final = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        x = self.neuralOde(x)
+        x = torch.relu(self.penultimate(x))
+        x = self.final(x)
+         
+        return x
+
+class LstmNeuralOdeModel(nn.Module):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32, s_span=torch.linspace(0, 1, 2)):
+        super().__init__()
+        self.func = LstmField(num_features=num_features)
+        self.neuralOde = NeuralODE(self.func, s_span=s_span)
 
         # self.m = nn.Sequential(
         #     self.neuralOde
