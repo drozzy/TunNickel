@@ -9,8 +9,6 @@ from torch.nn.utils.rnn import pad_sequence
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 
-KINEMATICS_USECOLS = [c-1 for c in [39, 40, 41, 51, 52, 53, 57,
-                                    58, 59, 60, 70, 71, 72, 76]]
 USERS = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
 ORIG_LABEL_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 LABELS = [f"G{i}" for i in ORIG_LABEL_IDS]
@@ -56,13 +54,13 @@ def trial_names_for_users(users):
             trial_names.append(trial_name(user, trial))
     return sorted(trial_names)
 
-def read_kinematic_data(trial_name, trials_dir):
+def read_kinematic_data(trial_name, trials_dir, usecols):
     path = f"{trials_dir}/kinematics/AllGestures/{trial_name}"
     path_binary = f"{path}.npy"
     if os.path.exists(path_binary):
         return np.load(path_binary)
     else:
-        d = genfromtxt(path, usecols=KINEMATICS_USECOLS)
+        d = genfromtxt(path, usecols=usecols)
         np.save(path, d)
         return d
         
@@ -90,7 +88,7 @@ def read_transcription_data(trial_name, trials_dir):
 
 
 class TrialDataset(Dataset):
-    def __init__(self, users, trials_dir="tunnickel/Suturing", downsample_factor=6):
+    def __init__(self, users, trials_dir="tunnickel/Suturing", downsample_factor=6, usecols=None):
         """ Create a dataset of trials corresponding to the given users.
 
         Args:
@@ -101,20 +99,21 @@ class TrialDataset(Dataset):
         self.users = users
         self.trials = trial_names_for_users(users)
         self.df = downsample_factor
+        self.usecols = usecols
 
     def __len__(self):
         return len(self.trials)
 
     def __getitem__(self, idx):
         trial = self.trials[idx]
-        x, y = read_data_and_labels(trial, self.trials_dir)
+        x, y = read_data_and_labels(trial, self.trials_dir, self.usecols)
         x, y = downsample(x, y, factor=self.df)
         return x, y
 
 def downsample(x, y, factor=6):
     return x[::factor, :], y[::factor]
 
-def read_data_and_labels(trial_name, trials_dir="Suturing"):
+def read_data_and_labels(trial_name, trials_dir="Suturing", usecols=None):
     """ Load data and labels.
 
     Args:
@@ -125,7 +124,7 @@ def read_data_and_labels(trial_name, trials_dir="Suturing"):
         which is of the shape (seq_len, 76) and the second
         element being the 0-based class labels of shape (seq_len,).
     """
-    kinematic_data = read_kinematic_data(trial_name, trials_dir)
+    kinematic_data = read_kinematic_data(trial_name, trials_dir, usecols)
     transcription_data = read_transcription_data(trial_name, trials_dir)
 
     seq_len = kinematic_data.shape[0]
@@ -153,7 +152,7 @@ def pad_collate(batch):
     return xs_pad, ys_pad, lens
 
 class TrialsDataModule(pl.LightningDataModule):
-    def __init__(self, trials_dir, test_users, train_batch_size=1, test_batch_size=8, num_workers=0, downsample_factor=6):
+    def __init__(self, trials_dir, test_users, train_batch_size=1, test_batch_size=8, num_workers=0, downsample_factor=6, usecols=None):
         super().__init__()
         assert type(test_users) == list
         assert type(test_users[0]) == str
@@ -165,12 +164,13 @@ class TrialsDataModule(pl.LightningDataModule):
              
         self.train_bs = train_batch_size
         self.test_bs = test_batch_size
+        self.usecols = usecols
     
     def setup(self, stage=None):
-        self.train_d = TrialDataset(self.train_users, self.trials_dir, self.df)
-        self.val_d = TrialDataset(self.test_users, self.trials_dir, self.df)
+        self.train_d = TrialDataset(self.train_users, self.trials_dir, self.df, self.usecols)
+        self.val_d = TrialDataset(self.test_users, self.trials_dir, self.df, self.usecols)
         # Use the same dataset for testing - just to plot the best validation score
-        self.test_d = TrialDataset(self.test_users, self.trials_dir, self.df)
+        self.test_d = TrialDataset(self.test_users, self.trials_dir, self.df, self.usecols)
         
     def train_dataloader(self):
         return DataLoader(dataset=self.train_d, batch_size=self.train_bs, 
