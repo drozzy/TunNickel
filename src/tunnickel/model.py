@@ -23,6 +23,7 @@ import torch.nn.functional as F
 #         out = self.linear(out)
 #         return out
 
+
 class LstmField(nn.Module):
     def __init__(self, num_features):
         super().__init__()
