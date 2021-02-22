@@ -74,7 +74,7 @@ for model in MODELS:
     summary = f"{model_name} Final Accuracy: {accuracy}, Std: {std}"
     print(summary)
 
-    with open(f'results_{model_name}.txt', 'w') as f:
+    with open(f'results_{model_name}_{NUM_FEATURES}.txt', 'w') as f:
         f.write(summary)
 
 # trainer = Trainer(max_epochs=max_epochs)
