@@ -11,8 +11,9 @@ from tunnickel.train import train
 import numpy as np
 from torchdyn.models import *
 # %%
-KINEMATICS_USECOLS = [c-1 for c in [39, 40, 41, 51, 52, 53, 57,
-                                    58, 59, 60, 70, 71, 72, 76]] # or None for all columns
+#KINEMATICS_USECOLS = [c-1 for c in [39, 40, 41, 51, 52, 53, 57,
+#                                    58, 59, 60, 70, 71, 72, 76]] # or None for all columns
+KINEMATICS_USECOLS = None
 MAX_EPOCHS = 10_000
 BATCH_SIZE = 32
 PATIENCE = 500
@@ -32,28 +33,27 @@ NUM_FEATURES = len(KINEMATICS_USECOLS) if KINEMATICS_USECOLS is not None else 76
 # MODEL = LstmNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32, s_span=torch.linspace(0, 1, 10))
 # MODEL = LinearModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32)
 
-aug_dims = 8 # 0
-lstm_cell = torch.nn.LSTMCell(NUM_FEATURES, 64)
-linear = torch.nn.Linear(64+aug_dims, 64+aug_dims)
-final  = torch.nn.Linear(64, NUM_LABELS)
-# flow = NeuralODE(linear)
+#aug_dims = 8 # 0
+#lstm_cell = torch.nn.LSTMCell(NUM_FEATURES, 64)
+#linear = torch.nn.Linear(64+aug_dims, 64+aug_dims)
+#final  = torch.nn.Linear(64, NUM_LABELS)
+## flow = NeuralODE(linear)
+#
+#flow = torch.nn.Sequential(
+#            Augmenter(augment_dims=8, augment_idx=1),
+#            NeuralODE(linear),
+#            torch.nn.Linear(64+aug_dims, 64)
+#)
+#
+#GPUS = 0
+#MODELS = [
+#    HybridNeuralDE(jump=lstm_cell, flow=flow, out=final, last_output=False)
+#]
 
-flow = torch.nn.Sequential(
-            Augmenter(augment_dims=8, augment_idx=1),
-            NeuralODE(linear),
-            torch.nn.Linear(64+aug_dims, 64)
-)
-
-GPUS = 0
-MODELS = [
-    HybridNeuralDE(jump=lstm_cell, flow=flow, out=final, last_output=False)
+MODELS= [
+    LstmResAugNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32),
+    LinearAugNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32)
 ]
-
-# GPUS = 1
-# MODELS= [
-#     LstmResAugNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32),
-#     LinearAugNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32)
-# ]
 
 for model in MODELS:
     model_name = model.__class__.__name__

@@ -55,13 +55,15 @@ def trial_names_for_users(users):
     return sorted(trial_names)
 
 def read_kinematic_data(trial_name, trials_dir, usecols):
+    cols_used = '76' if usecols is None else len(usecols)
     path = f"{trials_dir}/kinematics/AllGestures/{trial_name}"
-    path_binary = f"{path}.npy"
+    path_binary = f"{path}_{cols_used}.npy"
+    save_path = f"{path}_{cols_used}"
     if os.path.exists(path_binary):
         return np.load(path_binary)
     else:
         d = genfromtxt(path, usecols=usecols)
-        np.save(path, d)
+        np.save(save_path, d)
         return d
         
 
