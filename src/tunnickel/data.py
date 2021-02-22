@@ -9,7 +9,8 @@ from torch.nn.utils.rnn import pad_sequence
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 
-
+KINEMATICS_USECOLS = [c-1 for c in [39, 40, 41, 51, 52, 53, 57,
+                                    58, 59, 60, 70, 71, 72, 76]]
 USERS = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
 ORIG_LABEL_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 LABELS = [f"G{i}" for i in ORIG_LABEL_IDS]
@@ -61,7 +62,7 @@ def read_kinematic_data(trial_name, trials_dir):
     if os.path.exists(path_binary):
         return np.load(path_binary)
     else:
-        d = genfromtxt(path)
+        d = genfromtxt(path, usecols=KINEMATICS_USECOLS)
         np.save(path, d)
         return d
         
