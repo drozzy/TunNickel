@@ -319,6 +319,7 @@ class Module(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         loss, pred, target = self.get_loss(batch)
         self.log("train_acc_step", self.accuracy_train(pred, target))
+        self.log("train_loss", loss)
 
         return loss
 

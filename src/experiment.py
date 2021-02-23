@@ -33,26 +33,28 @@ NUM_FEATURES = len(KINEMATICS_USECOLS) if KINEMATICS_USECOLS is not None else 76
 # MODEL = LstmNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32, s_span=torch.linspace(0, 1, 10))
 # MODEL = LinearModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32)
 
-#aug_dims = 8 # 0
+#aug_dims = 8 # 8 # 0
 #lstm_cell = torch.nn.LSTMCell(NUM_FEATURES, 64)
-#linear = torch.nn.Linear(64+aug_dims, 64+aug_dims)
+#vec_f = torch.nn.Sequential(
+#    torch.nn.Linear(64+aug_dims, 64+aug_dims),
+#    nn.Tanh()
+#)
 #final  = torch.nn.Linear(64, NUM_LABELS)
-## flow = NeuralODE(linear)
-#
+#flow = NeuralODE(vec_f)
+
 #flow = torch.nn.Sequential(
 #            Augmenter(augment_dims=8, augment_idx=1),
-#            NeuralODE(linear),
+#            NeuralODE(vec_f),
 #            torch.nn.Linear(64+aug_dims, 64)
 #)
-#
+
 #GPUS = 0
 #MODELS = [
-#    HybridNeuralDE(jump=lstm_cell, flow=flow, out=final, last_output=False)
+#   HybridNeuralDE(jump=lstm_cell, flow=flow, out=final, last_output=False)
 #]
 
 MODELS= [
-    LstmResAugNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32),
-    LinearAugNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32)
+    LinearNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=64)
 ]
 
 for model in MODELS:
@@ -62,7 +64,7 @@ for model in MODELS:
     with resources.path("tunnickel", f"Suturing") as trials_dir:
         accuracies = []
         for user_out in USERS:
-            result = train(test_users=[user_out], model=model, max_epochs=MAX_EPOCHS, 
+            result = train(experiment_name=model_name, test_users=[user_out], model=model, max_epochs=MAX_EPOCHS, 
                 trials_dir=trials_dir, batch_size=BATCH_SIZE, patience=PATIENCE, 
                 gpus=GPUS, num_workers=NUM_WORKERS, downsample_factor=DOWNSAMPLE_FACTOR, usecols=KINEMATICS_USECOLS)
             acc = result['test_acc_epoch']
