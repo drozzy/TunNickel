@@ -342,15 +342,16 @@ class Module(pl.LightningModule):
         self.log("test_acc_epoch", self.accuracy_test.compute(), prog_bar=True)
         
     def get_loss(self, batch):
-        x, target, lens = batch
+        x, target_orig, lens = batch
         b, s = x.shape[0], x.shape[1]
-
-        pred = self(x)                  # batch x seq_len x classes
-        pred = pred.reshape(b*s, -1)    # batch*seq_len, classes
-
-        target = target.reshape(-1)     # batch x seq_len -> batch*seq_len
-
-        loss = F.cross_entropy(pred, target)
+        pred_logits = self(x)                  # batch x seq_len x classes
+        
+        pred = torch.argmax(pred_logits, dim=2).reshape(-1)
+        pred_logits = pred_logits.reshape(b*s, -1)    # batch*seq_len, classes
+        
+        target = target_orig.reshape(-1)     # batch x seq_len -> batch*seq_len
+       
+        loss = F.cross_entropy(pred_logits, target)
         return loss, pred, target
 
     def configure_optimizers(self):
