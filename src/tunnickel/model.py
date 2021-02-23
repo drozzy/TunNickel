@@ -331,16 +331,26 @@ class Module(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         loss, pred, target, lens = self.get_loss(batch)
         self.log('val_loss', loss)
-        print(pred.shape)
-        print(target.shape)
         accs = []
         for p, t, l in zip(pred, target, lens):
             p2 = p[:l].reshape(-1)
             t2 = t[:l].reshape(-1)
             self.log("val_acc_step", self.accuracy_val(p2, t2))
+
     def validation_epoch_end(self, outs):
         self.log("val_acc_epoch", self.accuracy_val.compute(), prog_bar=True)
 
+    def test_step(self, batch, batch_idx):
+        loss, pred, target, lens = self.get_loss(batch)
+        self.log('test_loss', loss)
+        accs = []
+        for p, t, l in zip(pred, target, lens):
+            p2 = p[:l].reshape(-1)
+            t2 = t[:l].reshape(-1)
+            self.log("test_acc_step", self.accuracy_test(p2, t2))
+
+    def test_epoch_end(self, outs):
+        self.log("test_acc_epoch", self.accuracy_test.compute(), prog_bar=True)
         
     def get_loss(self, batch):
         x, target_orig, lens = batch

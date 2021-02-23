@@ -43,7 +43,7 @@ def train(experiment_name, test_users, model, max_epochs, trials_dir, batch_size
     result = trainer.fit(mo, datamodule=dm)
 
     result = trainer.test()
-    return result[0]
+    return result
     # return result['test_acc']
 # %%
 # from tunnickel.model import Model, Module
