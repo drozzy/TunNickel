@@ -147,8 +147,8 @@ def pad_collate(batch):
     xs = [torch.tensor(b[0], dtype=torch.float32) for b in batch]
     ys = [torch.tensor(b[1], dtype=torch.int64) for b in batch]
 
-    xs_pad = pad_sequence(xs, batch_first=True)
-    ys_pad = pad_sequence(ys, batch_first=True)
+    xs_pad = pad_sequence(xs, batch_first=True, padding_value=-1)
+    ys_pad = pad_sequence(ys, batch_first=True, padding_value=-1)
     lens = [len(x) for x in xs]
     
     return xs_pad, ys_pad, lens

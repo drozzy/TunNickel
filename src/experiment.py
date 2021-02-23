@@ -54,7 +54,9 @@ NUM_FEATURES = len(KINEMATICS_USECOLS) if KINEMATICS_USECOLS is not None else 76
 #]
 
 MODELS= [
-    LinearNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=64)
+    #LstmModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32)
+    LinearModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=64)
+    # LinearNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=64)
 ]
 
 for model in MODELS:
