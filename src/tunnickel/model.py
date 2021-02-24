@@ -88,14 +88,11 @@ class ANODE_Linear(nn.Module):
         return x
 
 class NODE_LSTM(nn.Module):
-    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32, s_span=torch.linspace(0, 1, 2)):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         self.func = LstmField(num_features=num_features)
-        self.neuralOde = NeuralODE(self.func, s_span=s_span)
+        self.neuralOde = NeuralODE(self.func)
 
-        # self.m = nn.Sequential(
-        #     self.neuralOde
-        # )
         self.penultimate = nn.Linear(num_features, hidden_size)
         self.final = nn.Linear(hidden_size, num_classes)
 
@@ -113,9 +110,6 @@ class S_NODE_LSTM(nn.Module):
         self.func = LstmField(num_features=num_features)
         self.neuralOde = NeuralODE(self.func)
 
-        # self.m = nn.Sequential(
-        #     self.neuralOde
-        # )
         self.penultimate = nn.Linear(num_features, hidden_size)
         self.final = nn.Linear(hidden_size, num_classes)
 
@@ -230,13 +224,12 @@ class ANODE_CNN(nn.Module):
         return x
 
 class S_NODE_CNN(nn.Module):
-    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32, skip_weight=0.1):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         self.func = nn.Sequential(
             nn.Conv1d(in_channels=num_features, out_channels=num_features, kernel_size=3, padding=1),
             nn.Tanh()
         )
-        self.skip_weight = skip_weight
         self.neuralOde = NeuralODE(self.func)
 
         self.m = nn.Sequential(
@@ -251,7 +244,7 @@ class S_NODE_CNN(nn.Module):
         x = x.permute(0, 2, 1)
         x = self.m(x)
         x = x.permute(0, 2, 1)
-        x = x + self.skip_weight*x_orig
+        x = x + x_orig
         x = torch.relu(self.penultimate(x))
 
         x = self.final(x)
@@ -259,14 +252,13 @@ class S_NODE_CNN(nn.Module):
         return x
 
 class S_ANODE_CNN(nn.Module):
-    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32, skip_weight=0.1):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         aug_dims = 8
         self.func = nn.Sequential(
             nn.Conv1d(in_channels=num_features+aug_dims, out_channels=num_features+aug_dims, kernel_size=3, padding=1),
             nn.Tanh()
         )
-        self.skip_weight = skip_weight
         self.neuralOde = NeuralODE(self.func)
 
         self.m = nn.Sequential(
@@ -284,7 +276,7 @@ class S_ANODE_CNN(nn.Module):
         x = self.m(x)
         x = x.permute(0, 2, 1)
         x_orig = self.skip_aug(x_orig)
-        x = x + self.skip_weight*x_orig
+        x = x + x_orig
         x = torch.relu(self.penultimate(x))
 
         x = self.final(x)

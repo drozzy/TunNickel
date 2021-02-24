@@ -2,7 +2,7 @@
 from tunnickel.model import Module
 from tunnickel.data import TrialsDataModule, USERS, NUM_LABELS
 import torch
-from pytorch_lightning import Trainer, seed_everything
+from pytorch_lightning import Trainer
 import torch.nn.functional as F
 from importlib import resources
 import torch
@@ -12,10 +12,8 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
 
 
-# sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
-seed_everything(43)
 
-def create_trainer(experiment_name, patience, max_epochs, gpus):
+def create_trainer(experiment_name, patience, max_epochs, gpus, deterministic):
     early_stop_callback = EarlyStopping(
         monitor='val_acc_epoch',
         patience=patience,
@@ -29,12 +27,12 @@ def create_trainer(experiment_name, patience, max_epochs, gpus):
 
     tb_logger = pl_loggers.TensorBoardLogger('logs/', name=experiment_name)
 
-    trainer = pl.Trainer(logger=tb_logger, deterministic=True, gpus=gpus, max_epochs=max_epochs, 
+    trainer = pl.Trainer(logger=tb_logger, deterministic=deterministic, gpus=gpus, max_epochs=max_epochs, 
         callbacks=[early_stop_callback, checkpoint_callback])
     return trainer
     
-def train(experiment_name, test_users, model, max_epochs, trials_dir, batch_size = 3, patience=100, gpus=0, num_workers=0, downsample_factor=6, usecols=None):    
-    trainer = create_trainer(experiment_name, patience, max_epochs, gpus)
+def train(experiment_name, test_users, model, max_epochs, trials_dir, batch_size = 3, patience=100, gpus=0, num_workers=0, downsample_factor=6, usecols=None, deterministic=True):    
+    trainer = create_trainer(experiment_name, patience, max_epochs, gpus, deterministic)
     mo = Module(model=model)
     
     dm = TrialsDataModule(trials_dir, test_users=test_users, train_batch_size=batch_size,
