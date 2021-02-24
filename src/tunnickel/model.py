@@ -23,7 +23,7 @@ class LstmField(nn.Module):
         return y
 
 class LSTM_Model(nn.Module):
-    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32, dropout=0):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         self.m = LstmField(num_features=num_features)
         self.penultimate = nn.Linear(num_features, hidden_size)
