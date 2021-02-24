@@ -12,7 +12,7 @@ from pytorch_lightning import seed_everything
 #KINEMATICS_USECOLS = [c-1 for c in [39, 40, 41, 51, 52, 53, 57,
 #                                    58, 59, 60, 70, 71, 72, 76]] # or None for all columns
 
-def main(seed, deterministic, gpus):
+def main(model_name : str, seed, deterministic, gpus):
     # sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
     seed_everything(seed)
 
@@ -56,33 +56,39 @@ def main(seed, deterministic, gpus):
     #   HybridNeuralDE(jump=lstm_cell, flow=flow, out=final, last_output=False)
     #]
 
-    MODELS= [
-        S_NODE_CNN(num_features=NUM_FEATURES, num_classes=NUM_LABELS)
-    ]
+    if model_name == 'ANODE-LSTM':
+        model = ANODE_LSTM(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=1024)
+    elif model_name == 'S-ANODE-LSTM':
+        model = S_ANODE_LSTM(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=1024)
+    
+    params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Model parameters: {params}")
+    assert params > 140_000
+    assert params < 160_000
 
-    for model in MODELS:
-        model_name = model.__class__.__name__
-        
-        # Goal: Run Neural ODE with skip connection experiment and beat the Multi-Task RNN 85.5%
-        with resources.path("tunnickel", f"Suturing") as trials_dir:
-            accuracies = []
-            for _ in range(EXPERIMENT_REPEATS):
-                for user_out in USERS:
-                    results = train(experiment_name=model_name, test_users=[user_out], model=model, max_epochs=MAX_EPOCHS, 
-                        trials_dir=trials_dir, batch_size=BATCH_SIZE, patience=PATIENCE, 
-                        gpus=gpus, num_workers=NUM_WORKERS, downsample_factor=DOWNSAMPLE_FACTOR, usecols=KINEMATICS_USECOLS,
-                        deterministic=deterministic)
-                    acc = results[0]['test_acc_epoch']
-                    accuracies.append(acc)
 
-        accuracy = 100*np.mean(accuracies)
-        std      = 100*np.std(accuracies)
+    model_name = model.__class__.__name__
+    
+    # Goal: Run Neural ODE with skip connection experiment and beat the Multi-Task RNN 85.5%
+    with resources.path("tunnickel", f"Suturing") as trials_dir:
+        accuracies = []
+        for _ in range(EXPERIMENT_REPEATS):
+            for user_out in USERS:
+                results = train(experiment_name=model_name, test_users=[user_out], model=model, max_epochs=MAX_EPOCHS, 
+                    trials_dir=trials_dir, batch_size=BATCH_SIZE, patience=PATIENCE, 
+                    gpus=gpus, num_workers=NUM_WORKERS, downsample_factor=DOWNSAMPLE_FACTOR, usecols=KINEMATICS_USECOLS,
+                    deterministic=deterministic)
+                acc = results[0]['test_acc_epoch']
+                accuracies.append(acc)
 
-        summary = f"{model_name} Final Accuracy: {accuracy}, Std: {std}"
-        print(summary)
+    accuracy = 100*np.mean(accuracies)
+    std      = 100*np.std(accuracies)
 
-        with open(f'results_{model_name}_{NUM_FEATURES}_{EXPERIMENT_REPEATS}.txt', 'w') as f:
-            f.write(summary)
+    summary = f"{model_name} Final Accuracy: {accuracy}, Std: {std}"
+    print(summary)
+
+    with open(f'results/{model_name}_{NUM_FEATURES}_{EXPERIMENT_REPEATS}.txt', 'w') as f:
+        f.write(summary)
     # %%
 
 def create_parser():
@@ -91,6 +97,11 @@ def create_parser():
         default=42, 
         type=int,
         help="Random seed for reproducibility.")
+    parser.add_argument('--model',
+        default='S-ANODE-LSTM', 
+        choices=['S-ANODE', 'S-ANODE-LSTM'],
+        help='Model to train'
+    )
     parser.add_argument('--deterministic',
         default=True,
         type=bool,
@@ -104,4 +115,4 @@ def create_parser():
 if __name__ == '__main__':
     parser = create_parser()
     args = parser.parse_args()
-    main(args.seed, args.deterministic, args.gpus)
+    main(args.model, args.seed, args.deterministic, args.gpus)
