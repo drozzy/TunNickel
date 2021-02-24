@@ -1,4 +1,4 @@
-from tunnickel.model import LstmModel, LstmNeuralOdeModel, Module
+from tunnickel.model import LSTM_Model, NODE_LSTM, Module
 from importlib import resources
 import torch
 import torch.nn.functional as F
@@ -10,7 +10,7 @@ def test_neural_ode_model_forward():
     seq_len = 7
     input_size = 5
     num_classes = 10
-    m = LstmNeuralOdeModel(num_classes=num_classes, num_features=input_size)
+    m = NODE_LSTM(num_classes=num_classes, num_features=input_size)
     
     x = torch.rand((batch, seq_len, input_size))
     assert x.shape[0] == batch
@@ -35,7 +35,7 @@ def test_lstm_model_forward():
     seq_len = 7
     input_size = 5
     num_classes = 10
-    m = LstmModel(num_classes=num_classes, num_features=input_size)
+    m = LSTM_Model(num_classes=num_classes, num_features=input_size)
     
     x = torch.rand((batch, seq_len, input_size))
     assert x.shape[0] == batch
@@ -54,7 +54,7 @@ def test_lstm_model_forward():
     assert loss.shape == torch.Size([])
     
 def test_module_with_lstm_model_forward():
-    m = LstmModel(num_classes=1, num_features=1)
+    m = LSTM_Model(num_classes=1, num_features=1)
     mo = Module(model=m)
     # (batch, seq_len, input_size)
     batch = 2

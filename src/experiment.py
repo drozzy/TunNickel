@@ -1,5 +1,5 @@
 # %% 
-from tunnickel.model import LinearAugNeuralOdeModel, LinearNeuralOdeModel, LinearModel, LstmModel, Module, ResNeuralOdeModel, ResAugNeuralOdeModel, AugNeuralOdeModel, PlainNeuralOdeModel, LstmNeuralOdeModel, LstmResNeuralOdeModel, LstmResAugNeuralOdeModel, LstmAugNeuralOdeModel
+from tunnickel.model import ANODE_Linear, NODE, Linear_Model, LSTM_Model, Module, S_NODE_CNN, S_ANODE_CNN, ANODE_CNN, NODE_CNN, NODE_LSTM, S_NODE_LSTM, S_ANODE_LSTM, ANODE_LSTM
 from tunnickel.hybrid import HybridNeuralDE
 from tunnickel.data import TrialsDataModule, USERS, NUM_LABELS
 import torch
@@ -55,7 +55,7 @@ NUM_FEATURES = len(KINEMATICS_USECOLS) if KINEMATICS_USECOLS is not None else 76
 #]
 
 MODELS= [
-    ResNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS)
+    S_NODE_CNN(num_features=NUM_FEATURES, num_classes=NUM_LABELS)
     #LstmAugNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=1024)
 ]
 

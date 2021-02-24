@@ -22,7 +22,7 @@ class LstmField(nn.Module):
         y, _ = self.func(x)
         return y
 
-class LstmModel(nn.Module):
+class LSTM_Model(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32, dropout=0):
         super().__init__()
         self.m = LstmField(num_features=num_features)
@@ -36,7 +36,7 @@ class LstmModel(nn.Module):
          
         return x
 
-class LinearModel(nn.Module):
+class Linear_Model(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         self.m = nn.Linear(num_features, num_features)
@@ -50,7 +50,7 @@ class LinearModel(nn.Module):
          
         return x
 
-class LinearNeuralOdeModel(nn.Module):
+class NODE(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         self.func = nn.Linear(in_features=num_features, out_features=num_features)
@@ -66,7 +66,7 @@ class LinearNeuralOdeModel(nn.Module):
          
         return x
 
-class LinearAugNeuralOdeModel(nn.Module):
+class ANODE_Linear(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         aug_dims = 8
@@ -87,7 +87,7 @@ class LinearAugNeuralOdeModel(nn.Module):
          
         return x
 
-class LstmNeuralOdeModel(nn.Module):
+class NODE_LSTM(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32, s_span=torch.linspace(0, 1, 2)):
         super().__init__()
         self.func = LstmField(num_features=num_features)
@@ -107,7 +107,7 @@ class LstmNeuralOdeModel(nn.Module):
          
         return x
 
-class LstmResNeuralOdeModel(nn.Module):
+class S_NODE_LSTM(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         self.func = LstmField(num_features=num_features)
@@ -128,7 +128,7 @@ class LstmResNeuralOdeModel(nn.Module):
          
         return x
 
-class LstmResAugNeuralOdeModel(nn.Module):
+class S_ANODE_LSTM(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         aug_dims = 8
@@ -153,7 +153,7 @@ class LstmResAugNeuralOdeModel(nn.Module):
          
         return x
 
-class LstmAugNeuralOdeModel(nn.Module):
+class ANODE_LSTM(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         aug_dims = 8
@@ -176,7 +176,7 @@ class LstmAugNeuralOdeModel(nn.Module):
         return x
 
 
-class PlainNeuralOdeModel(nn.Module):
+class NODE_CNN(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         self.func = nn.Sequential(
@@ -201,7 +201,7 @@ class PlainNeuralOdeModel(nn.Module):
          
         return x
 
-class AugNeuralOdeModel(nn.Module):
+class ANODE_CNN(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         aug_dims = 8
@@ -229,7 +229,7 @@ class AugNeuralOdeModel(nn.Module):
          
         return x
 
-class ResNeuralOdeModel(nn.Module):
+class S_NODE_CNN(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32, skip_weight=0.1):
         super().__init__()
         self.func = nn.Sequential(
@@ -258,7 +258,7 @@ class ResNeuralOdeModel(nn.Module):
          
         return x
 
-class ResAugNeuralOdeModel(nn.Module):
+class S_ANODE_CNN(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32, skip_weight=0.1):
         super().__init__()
         aug_dims = 8
