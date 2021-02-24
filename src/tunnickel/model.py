@@ -12,19 +12,6 @@ from torchdyn import *
 # %%
 import torch.nn.functional as F
 
-# class LstmModel(nn.Module):
-#     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
-#         super().__init__()
-#         self.lstm = nn.LSTM(input_size=num_features, 
-#             hidden_size=hidden_size, batch_first=True)
-#         self.linear = nn.Linear(hidden_size, num_classes)
-
-#     def forward(self, x):
-#         out, _ = self.lstm(x)
-#         out = self.linear(out)
-#         return out
-
-
 class LstmField(nn.Module):
     def __init__(self, num_features):
         super().__init__()

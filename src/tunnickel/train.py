@@ -13,7 +13,7 @@ from pytorch_lightning import loggers as pl_loggers
 
 
 # sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
-seed_everything(42)
+seed_everything(43)
 
 def create_trainer(experiment_name, patience, max_epochs, gpus):
     early_stop_callback = EarlyStopping(

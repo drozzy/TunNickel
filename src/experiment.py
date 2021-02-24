@@ -55,7 +55,8 @@ NUM_FEATURES = len(KINEMATICS_USECOLS) if KINEMATICS_USECOLS is not None else 76
 #]
 
 MODELS= [
-    LstmResNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=1024)
+    ResNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS)
+    #LstmAugNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=1024)
 ]
 
 for model in MODELS:
