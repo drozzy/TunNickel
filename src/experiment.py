@@ -13,6 +13,7 @@ from torchdyn.models import *
 # %%
 #KINEMATICS_USECOLS = [c-1 for c in [39, 40, 41, 51, 52, 53, 57,
 #                                    58, 59, 60, 70, 71, 72, 76]] # or None for all columns
+EXPERIMENT_REPEATS = 1
 KINEMATICS_USECOLS = None
 MAX_EPOCHS = 10_000
 BATCH_SIZE = 32
@@ -33,31 +34,29 @@ NUM_FEATURES = len(KINEMATICS_USECOLS) if KINEMATICS_USECOLS is not None else 76
 # MODEL = LstmNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32, s_span=torch.linspace(0, 1, 10))
 # MODEL = LinearModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32)
 
-aug_dims = 8 # 8 # 0
-lstm_cell = torch.nn.LSTMCell(NUM_FEATURES, 64)
-vec_f = torch.nn.Sequential(
-   torch.nn.Linear(64+aug_dims, 64+aug_dims),
-   nn.Tanh()
-)
-final  = torch.nn.Linear(64, NUM_LABELS)
-# flow = NeuralODE(vec_f)
+# aug_dims = 8 # 8 # 0
+# lstm_cell = torch.nn.LSTMCell(NUM_FEATURES, 64)
+# vec_f = torch.nn.Sequential(
+#    torch.nn.Linear(64+aug_dims, 64+aug_dims),
+#    nn.Tanh()
+# )
+# final  = torch.nn.Linear(64, NUM_LABELS)
+# # flow = NeuralODE(vec_f)
 
-flow = torch.nn.Sequential(
-           Augmenter(augment_dims=8, augment_idx=1),
-           NeuralODE(vec_f),
-           torch.nn.Linear(64+aug_dims, 64)
-)
+# flow = torch.nn.Sequential(
+#            Augmenter(augment_dims=8, augment_idx=1),
+#            NeuralODE(vec_f),
+#            torch.nn.Linear(64+aug_dims, 64)
+# )
 
-GPUS = 0
-MODELS = [
-  HybridNeuralDE(jump=lstm_cell, flow=flow, out=final, last_output=False)
+# GPUS = 0
+#MODELS = [
+#   HybridNeuralDE(jump=lstm_cell, flow=flow, out=final, last_output=False)
+#]
+
+MODELS= [
+    LstmResNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=1024)
 ]
-
-# MODELS= [
-#     #LstmModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=32)
-#     LinearModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=64)
-#     # LinearNeuralOdeModel(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=64)
-# ]
 
 for model in MODELS:
     model_name = model.__class__.__name__
@@ -65,12 +64,13 @@ for model in MODELS:
     # Goal: Run Neural ODE with skip connection experiment and beat the Multi-Task RNN 85.5%
     with resources.path("tunnickel", f"Suturing") as trials_dir:
         accuracies = []
-        for user_out in USERS:
-            results = train(experiment_name=model_name, test_users=[user_out], model=model, max_epochs=MAX_EPOCHS, 
-                trials_dir=trials_dir, batch_size=BATCH_SIZE, patience=PATIENCE, 
-                gpus=GPUS, num_workers=NUM_WORKERS, downsample_factor=DOWNSAMPLE_FACTOR, usecols=KINEMATICS_USECOLS)
-            acc = results[0]['test_acc_epoch']
-            accuracies.append(acc)
+        for _ in range(EXPERIMENT_REPEATS):
+            for user_out in USERS:
+                results = train(experiment_name=model_name, test_users=[user_out], model=model, max_epochs=MAX_EPOCHS, 
+                    trials_dir=trials_dir, batch_size=BATCH_SIZE, patience=PATIENCE, 
+                    gpus=GPUS, num_workers=NUM_WORKERS, downsample_factor=DOWNSAMPLE_FACTOR, usecols=KINEMATICS_USECOLS)
+                acc = results[0]['test_acc_epoch']
+                accuracies.append(acc)
 
     accuracy = 100*np.mean(accuracies)
     std      = 100*np.std(accuracies)
@@ -78,7 +78,7 @@ for model in MODELS:
     summary = f"{model_name} Final Accuracy: {accuracy}, Std: {std}"
     print(summary)
 
-    with open(f'results_{model_name}_{NUM_FEATURES}.txt', 'w') as f:
+    with open(f'results_{model_name}_{NUM_FEATURES}_{EXPERIMENT_REPEATS}.txt', 'w') as f:
         f.write(summary)
 
 # trainer = Trainer(max_epochs=max_epochs)
