@@ -110,6 +110,8 @@ class TrialDataset(Dataset):
         trial = self.trials[idx]
         x, y = read_data_and_labels(trial, self.trials_dir, self.usecols)
         x, y = downsample(x, y, factor=self.df)
+        x = torch.tensor(x, dtype=torch.float32)
+        y = torch.tensor(y, dtype=torch.int32)
         return x, y
 
 def downsample(x, y, factor=6):
@@ -144,8 +146,8 @@ def read_data_and_labels(trial_name, trials_dir="Suturing", usecols=None):
     return kinematic_data[labeled_only_mask], labels
 
 def pad_collate(batch):
-    xs = [torch.tensor(b[0], dtype=torch.float32) for b in batch]
-    ys = [torch.tensor(b[1], dtype=torch.int64) for b in batch]
+    xs = [b[0] for b in batch]
+    ys = [b[1] for b in batch]
 
     xs_pad = pad_sequence(xs, batch_first=True, padding_value=-1)
     ys_pad = pad_sequence(ys, batch_first=True, padding_value=-1)
@@ -154,7 +156,7 @@ def pad_collate(batch):
     return xs_pad, ys_pad, lens
 
 class TrialsDataModule(pl.LightningDataModule):
-    def __init__(self, trials_dir, test_users, train_batch_size=1, test_batch_size=8, num_workers=0, downsample_factor=6, usecols=None):
+    def __init__(self, trials_dir="tunnickel/Suturing", test_users=["B"], train_batch_size=1, test_batch_size=8, num_workers=0, downsample_factor=6, usecols=None):
         super().__init__()
         assert type(test_users) == list
         assert type(test_users[0]) == str
