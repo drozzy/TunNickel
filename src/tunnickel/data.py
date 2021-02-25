@@ -111,7 +111,7 @@ class TrialDataset(Dataset):
         x, y = read_data_and_labels(trial, self.trials_dir, self.usecols)
         x, y = downsample(x, y, factor=self.df)
         x = torch.tensor(x, dtype=torch.float32)
-        y = torch.tensor(y, dtype=torch.int32)
+        y = torch.tensor(y, dtype=torch.int64)
         return x, y
 
 def downsample(x, y, factor=6):
