@@ -1,5 +1,5 @@
 # %% 
-from tunnickel.model import ANODE_Linear, NODE, Linear_Model, LSTM_Model, Module, S_NODE_CNN, S_ANODE_CNN, ANODE_CNN, NODE_CNN, NODE_LSTM, S_NODE_LSTM, S_ANODE_LSTM, ANODE_LSTM
+
 from tunnickel.hybrid import HybridNeuralDE
 from tunnickel.data import USERS, NUM_LABELS
 from pytorch_lightning import Trainer
@@ -55,30 +55,16 @@ def main(model_name : str, seed, deterministic, gpus, repeat):
     #   HybridNeuralDE(jump=lstm_cell, flow=flow, out=final, last_output=False)
     #]
 
-    if model_name == 'ANODE-LSTM':
-        model = ANODE_LSTM(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=1024)
-    elif model_name == 'S-ANODE-LSTM':
-        model = S_ANODE_LSTM(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=1024)
-    elif model_name == 'LSTM':
-        model = LSTM_Model(num_features=NUM_FEATURES, num_classes=NUM_LABELS, hidden_size=1256)
-    
-    params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f"Model parameters: {params}")
-    assert params > 140_000
-    assert params < 160_000
-
-
-    model_name = model.__class__.__name__
-    
     # Goal: Run Neural ODE with skip connection experiment and beat the Multi-Task RNN 85.5%
     with resources.path("tunnickel", f"Suturing") as trials_dir:
         accuracies = []
         for _ in range(repeat):
             for user_out in USERS:
-                results = train(experiment_name=model_name, test_users=[user_out], model=model, max_epochs=MAX_EPOCHS, 
+                
+                results = train(model_name=model_name, test_users=[user_out], max_epochs=MAX_EPOCHS, 
                     trials_dir=trials_dir, batch_size=BATCH_SIZE, patience=PATIENCE, 
                     gpus=gpus, num_workers=NUM_WORKERS, downsample_factor=DOWNSAMPLE_FACTOR, usecols=KINEMATICS_USECOLS,
-                    deterministic=deterministic)
+                    deterministic=deterministic,num_features=NUM_FEATURES, num_classes=NUM_LABELS)
                 acc = results[0]['test_acc_epoch']
                 accuracies.append(acc)
 
@@ -100,7 +86,7 @@ def create_parser():
         help="Random seed for reproducibility.")
     parser.add_argument('--model',
         default='S-ANODE-LSTM', 
-        choices=['S-ANODE', 'S-ANODE-LSTM', 'LSTM'],
+        choices=['S-ANODE', 'S-ANODE-LSTM', 'LSTM', 'Linear'],
         help='Model to train'
     )
     parser.add_argument('--repeat',
