@@ -49,12 +49,14 @@ def create_model(model_name, num_features, num_classes, params_min=140_000, para
         model = Linear_Model(num_features=num_features, num_classes=num_classes, hidden_size=1596)
     elif model_name == 'Hybrid-NODE-LSTM':
         model = create_hybrid_model(num_features, num_classes)
+    elif model_name == 'NODE-Linear':
+        model = NODE_Linear(num_features=num_features, num_classes=num_classes, hidden_size=1556)
     else:
         raise ValueError("No such model exists: %s" % model_name)
     params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Model parameters: {params}")
-    assert params > params_min, "Increase num of parameters in train.py to model."
-    assert params < params_max, "Decrease num of parameters in train.py to model."
+    assert params > params_min, f"Model has {params} but need at least {params_min}. Increase num of parameters in train.py to model."
+    assert params < params_max, f"Model has {params} but max is {params_max}. Decrease num of parameters in train.py to model."
 
     return model
 
