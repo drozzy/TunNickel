@@ -1,5 +1,5 @@
 # %% 
-
+from pathlib import Path
 from tunnickel.hybrid import HybridNeuralDE
 from tunnickel.data import USERS, NUM_LABELS
 from pytorch_lightning import Trainer
@@ -73,6 +73,8 @@ def main(project_name : str, model_name : str, seed, deterministic, gpus, repeat
     summary = f"{model_name} Final Accuracy: {accuracy}, Std: {std}"
     print(summary)
 
+
+    Path("results").mkdir(parents=True, exist_ok=True)
     with open(f'results/{model_name}_{NUM_FEATURES}_{repeat}.txt', 'w') as f:
         f.write(summary)
     # %%
