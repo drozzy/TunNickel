@@ -19,10 +19,10 @@ from torchdyn import *
 ## print
 def create_hybrid_model(num_features, num_classes):
     aug_dims = 8 # 8 # 0
-    hidden_dim = 128
+    hidden_dim = 102
     lstm_cell = torch.nn.LSTMCell(num_features, hidden_dim)
     vec_f = torch.nn.Sequential(
-       torch.nn.Linear(hidden_dim+aug_dims, hidden_dim+aug_dims),
+       torch.nn.Linear(2*hidden_dim+aug_dims, 2*hidden_dim+aug_dims),
        torch.nn.Tanh()
     )
     final  = torch.nn.Linear(hidden_dim, num_classes)
@@ -31,7 +31,7 @@ def create_hybrid_model(num_features, num_classes):
     flow = torch.nn.Sequential(
                Augmenter(augment_dims=8, augment_idx=1),
                NeuralODE(vec_f),
-               torch.nn.Linear(hidden_dim+aug_dims, hidden_dim)
+               torch.nn.Linear(2*hidden_dim+aug_dims, hidden_dim)
     )
 
     
@@ -61,7 +61,7 @@ def create_model(model_name, num_features, num_classes, params_min=140_000, para
     return model
 
 
-def create_trainer(model_name, patience, max_epochs, gpus, deterministic, test_users):
+def create_trainer(project_name, model_name, patience, max_epochs, gpus, deterministic, test_users):
     early_stop_callback = EarlyStopping(
         monitor='val_acc_epoch',
         patience=patience,
@@ -74,16 +74,16 @@ def create_trainer(model_name, patience, max_epochs, gpus, deterministic, test_u
     )
     experiment_name = ",".join(test_users)
 
-    wandb_logger = WandbLogger(project='TunNickel', name=experiment_name, group=model_name)
+    wandb_logger = WandbLogger(project=project_name, name=experiment_name, group=model_name)
     # tb_logger = pl_loggers.TensorBoardLogger('logs/', name=experiment_name)
 
     trainer = pl.Trainer(logger=wandb_logger, deterministic=deterministic, gpus=gpus, max_epochs=max_epochs, 
         callbacks=[early_stop_callback, checkpoint_callback])
     return trainer
     
-def train(model_name, test_users, max_epochs, trials_dir, batch_size, patience, gpus, num_workers, downsample_factor, usecols, 
+def train(project_name, model_name, test_users, max_epochs, trials_dir, batch_size, patience, gpus, num_workers, downsample_factor, usecols, 
         deterministic, num_features, num_classes):    
-    trainer = create_trainer(model_name, patience, max_epochs, gpus, deterministic, test_users)
+    trainer = create_trainer(project_name, model_name, patience, max_epochs, gpus, deterministic, test_users)
     model = create_model(model_name, num_features, num_classes)
     
     mo = Module(model=model)
