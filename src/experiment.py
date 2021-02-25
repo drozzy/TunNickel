@@ -12,12 +12,11 @@ from pytorch_lightning import seed_everything
 #KINEMATICS_USECOLS = [c-1 for c in [39, 40, 41, 51, 52, 53, 57,
 #                                    58, 59, 60, 70, 71, 72, 76]] # or None for all columns
 
-def main(model_name : str, seed, deterministic, gpus, repeat):
+def main(model_name : str, seed, deterministic, gpus, repeat, max_epochs):
     # sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
     seed_everything(seed)
 
     KINEMATICS_USECOLS = None
-    MAX_EPOCHS = 10_000
     BATCH_SIZE = 32
     PATIENCE = 500
     NUM_WORKERS = 16
@@ -61,7 +60,7 @@ def main(model_name : str, seed, deterministic, gpus, repeat):
         for _ in range(repeat):
             for user_out in USERS:
                 
-                results = train(model_name=model_name, test_users=[user_out], max_epochs=MAX_EPOCHS, 
+                results = train(model_name=model_name, test_users=[user_out], max_epochs=max_epochs, 
                     trials_dir=trials_dir, batch_size=BATCH_SIZE, patience=PATIENCE, 
                     gpus=gpus, num_workers=NUM_WORKERS, downsample_factor=DOWNSAMPLE_FACTOR, usecols=KINEMATICS_USECOLS,
                     deterministic=deterministic,num_features=NUM_FEATURES, num_classes=NUM_LABELS)
@@ -86,9 +85,14 @@ def create_parser():
         help="Random seed for reproducibility.")
     parser.add_argument('--model',
         default='S-ANODE-LSTM', 
-        choices=['S-ANODE', 'S-ANODE-LSTM', 'LSTM', 'Linear'],
+        choices=['Hybrid-NODE-LSTM', 'ANODE-LSTM', 'S-ANODE-LSTM', 'LSTM', 'Linear'],
         help='Model to train'
     )
+    parser.add_argument('--max-epochs',
+        default=10_000,
+        type=int,
+        help='Max epochs to train for.')
+    
     parser.add_argument('--repeat',
         default=1,
         type=int,
@@ -106,4 +110,4 @@ def create_parser():
 if __name__ == '__main__':
     parser = create_parser()
     args = parser.parse_args()
-    main(args.model, args.seed, args.deterministic, args.gpus, args.repeat)
+    main(args.model, args.seed, args.deterministic, args.gpus, args.repeat, args.max_epochs)

@@ -50,7 +50,7 @@ class Linear_Model(nn.Module):
          
         return x
 
-class NODE(nn.Module):
+class NODE_Linear(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         self.func = nn.Linear(in_features=num_features, out_features=num_features)
