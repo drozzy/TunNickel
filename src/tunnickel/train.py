@@ -13,6 +13,8 @@ from pytorch_lightning import loggers as pl_loggers
 from tunnickel.model import ANODE_Linear, NODE_Linear, Linear_Model, LSTM_Model, Module, S_NODE_CNN, S_ANODE_CNN, ANODE_CNN, NODE_CNN, NODE_LSTM, S_NODE_LSTM, S_ANODE_LSTM, ANODE_LSTM
 from torchdyn.models import *
 from torchdyn import *
+from pytorch_lightning.loggers import WandbLogger
+import wandb 
 
 ## print
 def create_hybrid_model(num_features, num_classes):
@@ -73,8 +75,6 @@ def create_trainer(project_name, model_name, patience, max_epochs, gpus, determi
     experiment_name = ",".join(test_users)
 
     if enable_logging:
-        from pytorch_lightning.loggers import WandbLogger
-        import wandb 
         logger = WandbLogger(project=project_name, name=experiment_name, group=model_name)  
     else:
         logger = None
