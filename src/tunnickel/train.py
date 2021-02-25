@@ -11,8 +11,6 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
 from tunnickel.model import ANODE_Linear, NODE_Linear, Linear_Model, LSTM_Model, Module, S_NODE_CNN, S_ANODE_CNN, ANODE_CNN, NODE_CNN, NODE_LSTM, S_NODE_LSTM, S_ANODE_LSTM, ANODE_LSTM
-from pytorch_lightning.loggers import WandbLogger
-import wandb 
 from torchdyn.models import *
 from torchdyn import *
 
@@ -61,7 +59,7 @@ def create_model(model_name, num_features, num_classes, params_min=140_000, para
     return model
 
 
-def create_trainer(project_name, model_name, patience, max_epochs, gpus, deterministic, test_users):
+def create_trainer(project_name, model_name, patience, max_epochs, gpus, deterministic, test_users, enable_logging):
     early_stop_callback = EarlyStopping(
         monitor='val_acc_epoch',
         patience=patience,
@@ -74,16 +72,20 @@ def create_trainer(project_name, model_name, patience, max_epochs, gpus, determi
     )
     experiment_name = ",".join(test_users)
 
-    wandb_logger = WandbLogger(project=project_name, name=experiment_name, group=model_name)
-    # tb_logger = pl_loggers.TensorBoardLogger('logs/', name=experiment_name)
-
-    trainer = pl.Trainer(logger=wandb_logger, deterministic=deterministic, gpus=gpus, max_epochs=max_epochs, 
+    if enable_logging:
+        from pytorch_lightning.loggers import WandbLogger
+        import wandb 
+        logger = WandbLogger(project=project_name, name=experiment_name, group=model_name)  
+    else:
+        logger = None
+    
+    trainer = pl.Trainer(logger=logger, deterministic=deterministic, gpus=gpus, max_epochs=max_epochs, 
         callbacks=[early_stop_callback, checkpoint_callback])
     return trainer
     
 def train(project_name, model_name, test_users, max_epochs, trials_dir, batch_size, patience, gpus, num_workers, downsample_factor, usecols, 
-        deterministic, num_features, num_classes):    
-    trainer = create_trainer(project_name, model_name, patience, max_epochs, gpus, deterministic, test_users)
+        deterministic, num_features, num_classes, enable_logging):    
+    trainer = create_trainer(project_name, model_name, patience, max_epochs, gpus, deterministic, test_users, enable_logging)
     model = create_model(model_name, num_features, num_classes)
     
     mo = Module(model=model)
@@ -96,7 +98,8 @@ def train(project_name, model_name, test_users, max_epochs, trials_dir, batch_si
     result = trainer.test()
 
     # Otherwise we keep writing to the same run!
-    wandb.finish()
+    if enable_logging:
+        wandb.finish()
     return result
     # return result['test_acc']
 # %%

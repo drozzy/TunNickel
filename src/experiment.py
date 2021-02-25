@@ -12,7 +12,7 @@ from pytorch_lightning import seed_everything
 #KINEMATICS_USECOLS = [c-1 for c in [39, 40, 41, 51, 52, 53, 57,
 #                                    58, 59, 60, 70, 71, 72, 76]] # or None for all columns
 
-def main(project_name : str, model_name : str, seed, deterministic, gpus, repeat, max_epochs):
+def main(project_name : str, model_name : str, seed, deterministic, gpus, repeat, max_epochs, enable_logging):
     # sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
     seed_everything(seed)
 
@@ -63,7 +63,7 @@ def main(project_name : str, model_name : str, seed, deterministic, gpus, repeat
                 results = train(project_name=project_name, model_name=model_name, test_users=[user_out], max_epochs=max_epochs, 
                     trials_dir=trials_dir, batch_size=BATCH_SIZE, patience=PATIENCE, 
                     gpus=gpus, num_workers=NUM_WORKERS, downsample_factor=DOWNSAMPLE_FACTOR, usecols=KINEMATICS_USECOLS,
-                    deterministic=deterministic,num_features=NUM_FEATURES, num_classes=NUM_LABELS)
+                    deterministic=deterministic,num_features=NUM_FEATURES, num_classes=NUM_LABELS, enable_logging=enable_logging)
                 acc = results[0]['test_acc_epoch']
                 accuracies.append(acc)
 
@@ -96,15 +96,18 @@ def create_parser():
         default=10_000,
         type=int,
         help='Max epochs to train for.')
-    
     parser.add_argument('--repeat',
         default=1,
         type=int,
         help='How many times to repeat the experiment')
     parser.add_argument('--deterministic',
-        default=True,
-        type=bool,
-        help='Wether to run training in determinstic mode for reproducibility. Needed if setting a seed.')
+        default=False,
+        action='store_true',
+        help='Run training in determinstic mode for reproducibility.')
+    parser.add_argument('--disable-logging',
+        default=False,
+        action='store_true',
+        help='Disable logging of the experiment.')
     parser.add_argument('--gpus',
         default=1,
         type=int,
@@ -113,5 +116,5 @@ def create_parser():
 
 if __name__ == '__main__':
     parser = create_parser()
-    args = parser.parse_args()
-    main(args.project_name, args.model, args.seed, args.deterministic, args.gpus, args.repeat, args.max_epochs)
+    a = parser.parse_args()
+    main(a.project_name, a.model, a.seed, a.deterministic, a.gpus, a.repeat, a.max_epochs, not a.disable_logging)
