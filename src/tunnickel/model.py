@@ -297,24 +297,19 @@ class Module(pl.LightningModule):
         return y
     
     def training_step(self, batch, batch_idx):
-        loss, pred, target, lens = self.get_loss(batch)
-        #accs = []
-        #for p, t, l in zip(pred, target, lens):
-            #self.log("train_acc_step", self.accuracy_train(p[:l], t[:l]))
-
+        loss, _pred, _target, _lens = self.get_loss(batch)
         self.log("train_loss", loss)
 
         return loss
 
-
     def validation_step(self, batch, batch_idx):
         loss, pred, target, lens = self.get_loss(batch)
         self.log('val_loss', loss)
-        accs = []
+        
         for p, t, l in zip(pred, target, lens):
             p2 = p[:l].reshape(-1)
             t2 = t[:l].reshape(-1)
-            self.log("val_acc_step", self.accuracy_val(p2, t2))
+            self.accuracy_val(p2, t2)
 
     def validation_epoch_end(self, outs):
         self.log("val_acc_epoch", self.accuracy_val.compute(), prog_bar=True)
@@ -322,11 +317,11 @@ class Module(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         loss, pred, target, lens = self.get_loss(batch)
         self.log('test_loss', loss)
-        accs = []
+        
         for p, t, l in zip(pred, target, lens):
             p2 = p[:l].reshape(-1)
             t2 = t[:l].reshape(-1)
-            self.log("test_acc_step", self.accuracy_test(p2, t2))
+            self.accuracy_test(p2, t2)
 
     def test_epoch_end(self, outs):
         self.log("test_acc_epoch", self.accuracy_test.compute(), prog_bar=True)
