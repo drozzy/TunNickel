@@ -44,7 +44,7 @@ def create_model(model_name, num_features, num_classes, min_params=140_000, max_
     elif model_name == 'CNN':
         model = CNN(num_features=num_features, num_classes=num_classes, hidden_size=1445)
     elif model_name == 'LSTM2_NODE':
-        model = LSTM2_NODE(num_features=num_features, num_classes=num_classes, hidden_size=111)
+        model = LSTM2_NODE(num_features=num_features, num_classes=num_classes, hidden_size=93)
     else:
         raise ValueError("No such model exists: %s" % model_name)
     params = sum(p.numel() for p in model.parameters() if p.requires_grad)

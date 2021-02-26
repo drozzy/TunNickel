@@ -67,39 +67,28 @@ class NODE_Linear(nn.Module):
         return x
 
 class LSTM2_NODE(nn.Module):
+    """ LSTM2-NODE uses [x_t, h_{t-1}, h_t]  as input to NODE. """
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
         self.lstm = nn.LSTM(input_size=num_features, hidden_size=hidden_size, batch_first=True)
-        self.func = nn.Linear(in_features=2*hidden_size, out_features=2*hidden_size)
+        self.func = nn.Linear(in_features=2*hidden_size+num_features, out_features=2*hidden_size+num_features)
         self.neuralOde = NeuralODE(self.func)
 
-        self.penultimate = nn.Linear(hidden_size*2, hidden_size)
+        self.penultimate = nn.Linear(hidden_size*2+num_features, hidden_size)
         self.final = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x):
         h, _ = self.lstm(x)
         h_prev = torch.roll(h, shifts=1, dims=1)
-        x = torch.cat((h, h_prev), dim=2)
+        x = torch.cat((x, h_prev, h), dim=2)
         
         x = self.neuralOde(x)
+        
         x = torch.relu(self.penultimate(x))
         x = self.final(x)
          
         return x
-# %%
-# import torch
-# h = torch.tensor([ [ [1, 2],
-#                      [3, 4],
-#                      [5, 6],
-#                      [7, 8],
-#                      [9, 10] ] ])
-# print(h.shape)
-# r = torch.roll(h, shifts=1, dims=1)
-# # r[:, 0, :] = 0
-# print(r)
-# s = torch.cat((h, r), dim=2)
-# print(s)
-# # torch.roll(input, shifts, dims=None)
+
 # %%
 class ANODE_Linear(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
