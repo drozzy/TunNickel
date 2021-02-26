@@ -13,12 +13,11 @@ from pytorch_lightning import seed_everything
 #                                    58, 59, 60, 70, 71, 72, 76]] # or None for all columns
 
 def main(project_name : str, model_name : str, seed, deterministic, gpus, repeat, max_epochs, enable_logging,
-            min_params, max_params):
+            min_params, max_params, batch_size):
     # sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
     seed_everything(seed)
 
     KINEMATICS_USECOLS = None
-    BATCH_SIZE = 32
     PATIENCE = 500
     NUM_WORKERS = 16
     DOWNSAMPLE_FACTOR = 6
@@ -62,7 +61,7 @@ def main(project_name : str, model_name : str, seed, deterministic, gpus, repeat
             for user_out in USERS:
                 
                 results = train(project_name=project_name, model_name=model_name, test_users=[user_out], max_epochs=max_epochs, 
-                    trials_dir=trials_dir, batch_size=BATCH_SIZE, patience=PATIENCE, 
+                    trials_dir=trials_dir, batch_size=batch_size, patience=PATIENCE, 
                     gpus=gpus, num_workers=NUM_WORKERS, downsample_factor=DOWNSAMPLE_FACTOR, usecols=KINEMATICS_USECOLS,
                     deterministic=deterministic,num_features=NUM_FEATURES, num_classes=NUM_LABELS, enable_logging=enable_logging,
                     min_params=min_params, max_params=max_params)
@@ -100,6 +99,10 @@ def create_parser():
         default=10_000,
         type=int,
         help='Max epochs to train for.')
+    parser.add_argument('--batch-size',
+        default=32,
+        type=int,
+        help='Training batch size.')        
     parser.add_argument('--repeat',
         default=1,
         type=int,
@@ -131,4 +134,4 @@ if __name__ == '__main__':
     parser = create_parser()
     a = parser.parse_args()
     main(a.project_name, a.model, a.seed, a.deterministic, a.gpus, a.repeat, a.max_epochs, not a.disable_logging,
-        a.min_params, a.max_params)
+        a.min_params, a.max_params, a.batch_size)
