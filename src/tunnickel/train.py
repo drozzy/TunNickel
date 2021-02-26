@@ -26,7 +26,7 @@ def create_model(model_name, num_features, num_classes, min_params=140_000, max_
     elif model_name == 'S-ANODE-LSTM':
         model = S_ANODE_LSTM(num_features=num_features, num_classes=num_classes, hidden_size=1024)
     elif model_name == 'LSTM':
-        model = LSTM_Model(num_features=num_features, num_classes=num_classes, hidden_size=1256)
+        model = LSTM_Model(num_features=num_features, num_classes=num_classes, hidden_size=1024)
     elif model_name == 'Linear':
         model = Linear_Model(num_features=num_features, num_classes=num_classes, hidden_size=1596)
     # elif model_name == 'Hybrid-NODE-LSTM':
