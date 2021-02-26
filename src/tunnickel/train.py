@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
-from tunnickel.model import CNN, S_ANODE_Linear, ANODE_Linear, NODE_Linear, Linear_Model, LSTM_Model, Module, S_NODE_CNN, S_ANODE_CNN, ANODE_CNN, NODE_CNN, NODE_LSTM, S_NODE_LSTM, S_ANODE_LSTM, ANODE_LSTM
+from tunnickel.model import LSTM2_NODE, CNN, S_ANODE_Linear, ANODE_Linear, NODE_Linear, Linear_Model, LSTM_Model, Module, S_NODE_CNN, S_ANODE_CNN, ANODE_CNN, NODE_CNN, NODE_LSTM, S_NODE_LSTM, S_ANODE_LSTM, ANODE_LSTM
 from torchdyn.models import *
 from torchdyn import *
 from pytorch_lightning.loggers import WandbLogger
@@ -20,7 +20,7 @@ from tunnickel.ode_rnn_rubanova import ODE_RNN_Rubanova
 ## print
  
 
-def create_model(model_name, num_features, num_classes, params_min=140_000, params_max=160_000):
+def create_model(model_name, num_features, num_classes, min_params=140_000, max_params=160_000):
     if model_name == 'ANODE-LSTM':
         model = ANODE_LSTM(num_features=num_features, num_classes=num_classes, hidden_size=1024)
     elif model_name == 'S-ANODE-LSTM':
@@ -29,10 +29,10 @@ def create_model(model_name, num_features, num_classes, params_min=140_000, para
         model = LSTM_Model(num_features=num_features, num_classes=num_classes, hidden_size=1256)
     elif model_name == 'Linear':
         model = Linear_Model(num_features=num_features, num_classes=num_classes, hidden_size=1596)
-    elif model_name == 'Hybrid-NODE-LSTM':
-        model = HybridNeuralDE(num_features=num_features, num_classes=num_classes, hidden_size=146)
+    # elif model_name == 'Hybrid-NODE-LSTM':
+    #     model = HybridNeuralDE(num_features=num_features, num_classes=num_classes, hidden_size=146)
     elif model_name == 'ODE-RNN-Rubanova':
-        model = ODE_RNN_Rubanova(num_features=num_features, num_classes=num_classes, hidden_size=146)
+        model = ODE_RNN_Rubanova(num_features=num_features, num_classes=num_classes, hidden_size=136)
     elif model_name == 'NODE-Linear':
         model = NODE_Linear(num_features=num_features, num_classes=num_classes, hidden_size=1556)
     elif model_name == 'ANODE-Linear':
@@ -43,12 +43,14 @@ def create_model(model_name, num_features, num_classes, params_min=140_000, para
         model = NODE_CNN(num_features=num_features, num_classes=num_classes, hidden_size=1446)
     elif model_name == 'CNN':
         model = CNN(num_features=num_features, num_classes=num_classes, hidden_size=1445)
+    elif model_name == 'LSTM2_NODE':
+        model = LSTM2_NODE(num_features=num_features, num_classes=num_classes, hidden_size=111)
     else:
         raise ValueError("No such model exists: %s" % model_name)
     params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Model parameters: {params}")
-    assert params > params_min, f"Model has {params} but need at least {params_min}. Increase num of parameters in train.py to model."
-    assert params < params_max, f"Model has {params} but max is {params_max}. Decrease num of parameters in train.py to model."
+    assert params > min_params, f"Model has {params} but need at least {min_params}. Increase num of parameters in train.py to model."
+    assert params < max_params, f"Model has {params} but max is {max_params}. Decrease num of parameters in train.py to model."
 
     return model
 
@@ -76,9 +78,9 @@ def create_trainer(project_name, model_name, patience, max_epochs, gpus, determi
     return trainer
     
 def train(project_name, model_name, test_users, max_epochs, trials_dir, batch_size, patience, gpus, num_workers, downsample_factor, usecols, 
-        deterministic, num_features, num_classes, enable_logging):    
+        deterministic, num_features, num_classes, enable_logging, min_params, max_params):    
     trainer = create_trainer(project_name, model_name, patience, max_epochs, gpus, deterministic, test_users, enable_logging)
-    model = create_model(model_name, num_features, num_classes)
+    model = create_model(model_name, num_features, num_classes, min_params, max_params)
     
     mo = Module(model=model)
     

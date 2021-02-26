@@ -20,6 +20,7 @@ class ODE_RNN_Rubanova(nn.Module):
 
         self.jump = torch.nn.LSTMCell(num_features, self.hidden_dim)
  
+        self.linear = torch.nn.Linear(self.hidden_dim, self.hidden_dim)
         self.out = torch.nn.Linear(self.hidden_dim, num_classes)
 
         self.jump_func = self._jump_latent_cell
@@ -34,6 +35,7 @@ class ODE_RNN_Rubanova(nn.Module):
             h, c = self.jump_func(x_t, h, c)
             
             Y[t] = h
+        Y = torch.relu(self.linear(Y))
         Y = self.out(Y)
         return Y
 

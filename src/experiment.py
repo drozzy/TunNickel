@@ -12,7 +12,8 @@ from pytorch_lightning import seed_everything
 #KINEMATICS_USECOLS = [c-1 for c in [39, 40, 41, 51, 52, 53, 57,
 #                                    58, 59, 60, 70, 71, 72, 76]] # or None for all columns
 
-def main(project_name : str, model_name : str, seed, deterministic, gpus, repeat, max_epochs, enable_logging):
+def main(project_name : str, model_name : str, seed, deterministic, gpus, repeat, max_epochs, enable_logging,
+            min_params, max_params):
     # sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
     seed_everything(seed)
 
@@ -63,7 +64,8 @@ def main(project_name : str, model_name : str, seed, deterministic, gpus, repeat
                 results = train(project_name=project_name, model_name=model_name, test_users=[user_out], max_epochs=max_epochs, 
                     trials_dir=trials_dir, batch_size=BATCH_SIZE, patience=PATIENCE, 
                     gpus=gpus, num_workers=NUM_WORKERS, downsample_factor=DOWNSAMPLE_FACTOR, usecols=KINEMATICS_USECOLS,
-                    deterministic=deterministic,num_features=NUM_FEATURES, num_classes=NUM_LABELS, enable_logging=enable_logging)
+                    deterministic=deterministic,num_features=NUM_FEATURES, num_classes=NUM_LABELS, enable_logging=enable_logging,
+                    min_params=min_params, max_params=max_params)
                 acc = results[0]['test_acc_epoch']
                 accuracies.append(acc)
 
@@ -87,7 +89,7 @@ def create_parser():
         help="Random seed for reproducibility.")
     parser.add_argument('--model',
         default='S-ANODE-LSTM', 
-        choices=['ODE-RNN-Rubanova', 'CNN', 'NODE-CNN', 'S-ANODE-Linear', 'ANODE-Linear', 'NODE-Linear', 'Hybrid-NODE-LSTM', 'ANODE-LSTM', 'S-ANODE-LSTM', 'LSTM', 'Linear'],
+        choices=['LSTM2_NODE', 'ODE-RNN-Rubanova', 'CNN', 'NODE-CNN', 'S-ANODE-Linear', 'ANODE-Linear', 'NODE-Linear', 'Hybrid-NODE-LSTM', 'ANODE-LSTM', 'S-ANODE-LSTM', 'LSTM', 'Linear'],
         help='Model to train'
     )
     parser.add_argument('--project-name',
@@ -114,9 +116,19 @@ def create_parser():
         default=1,
         type=int,
         help='Number of GPUs to use. Setting to 0 disables GPU training.')
+    parser.add_argument('--max-params',
+        default=160_000,
+        type=int,
+        help='Verify the maximum number of parameters a model should have.')
+    parser.add_argument('--min-params',
+        default=140_000,
+        type=int,
+        help='Verify the minimum number of parameters a model should have.')
+            
     return parser
 
 if __name__ == '__main__':
     parser = create_parser()
     a = parser.parse_args()
-    main(a.project_name, a.model, a.seed, a.deterministic, a.gpus, a.repeat, a.max_epochs, not a.disable_logging)
+    main(a.project_name, a.model, a.seed, a.deterministic, a.gpus, a.repeat, a.max_epochs, not a.disable_logging,
+        a.min_params, a.max_params)
