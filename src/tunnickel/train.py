@@ -16,7 +16,7 @@ from torchdyn import *
 from pytorch_lightning.loggers import WandbLogger
 import wandb 
 from tunnickel.hybrid import HybridNeuralDE
-from ode_rnn_rubanova import ODE_RNN_Rubanova
+from tunnickel.ode_rnn_rubanova import ODE_RNN_Rubanova
 ## print
  
 
