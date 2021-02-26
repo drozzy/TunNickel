@@ -86,6 +86,30 @@ class ANODE_Linear(nn.Module):
         x = self.final(x)
          
         return x
+class S_ANODE_Linear(nn.Module):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
+        super().__init__()
+        aug_dims = 8
+        self.func = nn.Linear(in_features=num_features+aug_dims, out_features=num_features+aug_dims)
+        self.neuralOde = NeuralODE(self.func)
+
+        self.m = nn.Sequential(
+            Augmenter(augment_dims=aug_dims, augment_idx=2),
+            self.neuralOde
+        )
+        self.skip_aug = Augmenter(augment_dims=aug_dims, augment_idx=2)
+
+        self.penultimate = nn.Linear(num_features+aug_dims, hidden_size)
+        self.final = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        x_orig = x
+        x = self.m(x)
+        x = x + self.skip_aug(x_orig)
+        x = torch.relu(self.penultimate(x))
+        x = self.final(x)
+         
+        return x
 
 class NODE_LSTM(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
@@ -169,6 +193,26 @@ class ANODE_LSTM(nn.Module):
          
         return x
 
+class CNN(nn.Module):
+    def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
+        super().__init__()
+        self.func = nn.Sequential(
+            nn.Conv1d(in_channels=num_features, out_channels=num_features, kernel_size=3, padding=1),
+            nn.ReLU()
+        )
+
+        self.penultimate = nn.Linear(num_features, hidden_size)
+        self.final = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        x = x.permute(0, 2, 1)
+        x = self.func(x)
+        x = x.permute(0, 2, 1)
+        x = torch.relu(self.penultimate(x))
+
+        x = self.final(x)
+         
+        return x
 
 class NODE_CNN(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):

@@ -87,7 +87,7 @@ def create_parser():
         help="Random seed for reproducibility.")
     parser.add_argument('--model',
         default='S-ANODE-LSTM', 
-        choices=['NODE-Linear', 'Hybrid-NODE-LSTM', 'ANODE-LSTM', 'S-ANODE-LSTM', 'LSTM', 'Linear'],
+        choices=['ODE-RNN-Rubanova', 'CNN', 'NODE-CNN', 'S-ANODE-Linear', 'ANODE-Linear', 'NODE-Linear', 'Hybrid-NODE-LSTM', 'ANODE-LSTM', 'S-ANODE-LSTM', 'LSTM', 'Linear'],
         help='Model to train'
     )
     parser.add_argument('--project-name',

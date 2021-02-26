@@ -10,33 +10,15 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
-from tunnickel.model import ANODE_Linear, NODE_Linear, Linear_Model, LSTM_Model, Module, S_NODE_CNN, S_ANODE_CNN, ANODE_CNN, NODE_CNN, NODE_LSTM, S_NODE_LSTM, S_ANODE_LSTM, ANODE_LSTM
+from tunnickel.model import CNN, S_ANODE_Linear, ANODE_Linear, NODE_Linear, Linear_Model, LSTM_Model, Module, S_NODE_CNN, S_ANODE_CNN, ANODE_CNN, NODE_CNN, NODE_LSTM, S_NODE_LSTM, S_ANODE_LSTM, ANODE_LSTM
 from torchdyn.models import *
 from torchdyn import *
 from pytorch_lightning.loggers import WandbLogger
 import wandb 
-
+from tunnickel.hybrid import HybridNeuralDE
+from ode_rnn_rubanova import ODE_RNN_Rubanova
 ## print
-def create_hybrid_model(num_features, num_classes):
-    aug_dims = 8 # 8 # 0
-    hidden_dim = 102
-    lstm_cell = torch.nn.LSTMCell(num_features, hidden_dim)
-    vec_f = torch.nn.Sequential(
-       torch.nn.Linear(2*hidden_dim+aug_dims, 2*hidden_dim+aug_dims),
-       torch.nn.Tanh()
-    )
-    final  = torch.nn.Linear(hidden_dim, num_classes)
-    # flow = NeuralODE(vec_f)
-
-    flow = torch.nn.Sequential(
-               Augmenter(augment_dims=8, augment_idx=1),
-               NeuralODE(vec_f),
-               torch.nn.Linear(2*hidden_dim+aug_dims, hidden_dim)
-    )
-
-    
-    return HybridNeuralDE(jump=lstm_cell, flow=flow, out=final, last_output=False)
-    
+ 
 
 def create_model(model_name, num_features, num_classes, params_min=140_000, params_max=160_000):
     if model_name == 'ANODE-LSTM':
@@ -48,9 +30,19 @@ def create_model(model_name, num_features, num_classes, params_min=140_000, para
     elif model_name == 'Linear':
         model = Linear_Model(num_features=num_features, num_classes=num_classes, hidden_size=1596)
     elif model_name == 'Hybrid-NODE-LSTM':
-        model = create_hybrid_model(num_features, num_classes)
+        model = HybridNeuralDE(num_features=num_features, num_classes=num_classes, hidden_size=146)
+    elif model_name == 'ODE-RNN-Rubanova':
+        model = ODE_RNN_Rubanova(num_features=num_features, num_classes=num_classes, hidden_size=146)
     elif model_name == 'NODE-Linear':
         model = NODE_Linear(num_features=num_features, num_classes=num_classes, hidden_size=1556)
+    elif model_name == 'ANODE-Linear':
+        model = ANODE_Linear(num_features=num_features, num_classes=num_classes, hidden_size=1556)
+    elif model_name == 'S-ANODE-Linear':
+        model = S_ANODE_Linear(num_features=num_features, num_classes=num_classes, hidden_size=1416)
+    elif model_name == 'NODE-CNN':
+        model = NODE_CNN(num_features=num_features, num_classes=num_classes, hidden_size=1446)
+    elif model_name == 'CNN':
+        model = CNN(num_features=num_features, num_classes=num_classes, hidden_size=1445)
     else:
         raise ValueError("No such model exists: %s" % model_name)
     params = sum(p.numel() for p in model.parameters() if p.requires_grad)
