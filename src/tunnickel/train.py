@@ -15,7 +15,6 @@ from torchdyn.models import *
 from torchdyn import *
 from pytorch_lightning.loggers import WandbLogger
 import wandb 
-from tunnickel.hybrid import HybridNeuralDE
 from tunnickel.ode_rnn_rubanova import ODE_RNN_Rubanova
 ## print
  
@@ -53,7 +52,7 @@ def create_model(model_name, num_features, num_classes, min_params=140_000, max_
     return model
 
 
-def create_trainer(project_name, model_name, patience, max_epochs, gpus, deterministic, test_users, enable_logging):
+def create_trainer(project_name, model_name, patience, max_epochs, gpus, test_users, enable_logging):
     early_stop_callback = EarlyStopping(
         monitor='val_acc_epoch',
         patience=patience,
@@ -71,13 +70,13 @@ def create_trainer(project_name, model_name, patience, max_epochs, gpus, determi
     else:
         logger = None
     
-    trainer = pl.Trainer(logger=logger, deterministic=deterministic, gpus=gpus, max_epochs=max_epochs,
+    trainer = pl.Trainer(logger=logger, gpus=gpus, max_epochs=max_epochs,
         callbacks=[early_stop_callback, checkpoint_callback])
     return trainer
     
 def train(project_name, model_name, test_users, max_epochs, trials_dir, batch_size, patience, gpus, num_workers, downsample_factor, usecols, 
-        deterministic, num_features, num_classes, enable_logging, min_params, max_params):    
-    trainer = create_trainer(project_name, model_name, patience, max_epochs, gpus, deterministic, test_users, enable_logging)
+        num_features, num_classes, enable_logging, min_params, max_params):    
+    trainer = create_trainer(project_name, model_name, patience, max_epochs, gpus, test_users, enable_logging)
     model = create_model(model_name, num_features, num_classes, min_params, max_params)
     
     mo = Module(model=model)

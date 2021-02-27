@@ -1,6 +1,5 @@
 # %% 
 from tunnickel.model import ANODE_Linear, NODE_Linear, Linear_Model, LSTM_Model, Module, S_NODE_CNN, S_ANODE_CNN, ANODE_CNN, NODE_CNN, NODE_LSTM, S_NODE_LSTM, S_ANODE_LSTM, ANODE_LSTM
-from tunnickel.hybrid import HybridNeuralDE
 from tunnickel.data import USERS, NUM_LABELS
 from pytorch_lightning import Trainer
 from importlib import resources
