@@ -35,7 +35,7 @@ def main(project_name : str, model_name : str, seed, gpus, repeat, max_epochs, e
 
                 results = train(project_name, experiment_name, model_name, test_users, max_epochs, 
                     trials_dir, batch_size, patience, gpus, NUM_WORKERS, DOWNSAMPLE_FACTOR, KINEMATICS_USECOLS,
-                    NUM_FEATURES, NUM_LABELS, enable_logging, min_params, max_params, dropout)
+                    NUM_FEATURES, NUM_LABELS, enable_logging, min_params, max_params, dropout, seed)
 
                 acc = results[0]['test_acc_epoch']
                 accuracies.append(acc)

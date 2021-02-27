@@ -67,7 +67,7 @@ def create_trainer(project_name, experiment_name, model_name, patience, max_epoc
     return trainer
     
 def train(project_name, experiment_name, model_name, test_users, max_epochs, trials_dir, batch_size, patience, gpus, num_workers, downsample_factor, usecols, 
-        num_features, num_classes, enable_logging, min_params, max_params, dropout):    
+        num_features, num_classes, enable_logging, min_params, max_params, dropout, seed):    
 
     trainer = create_trainer(project_name, experiment_name, model_name, patience, max_epochs, gpus, enable_logging)
     model = create_model(model_name, num_features, num_classes, min_params, max_params, dropout)
@@ -90,6 +90,7 @@ def train(project_name, experiment_name, model_name, test_users, max_epochs, tri
         wandb.config.num_features = num_features
         wandb.config.num_classes = num_classes
         wandb.config.dropout = dropout
+        wandb.config.seed = seed
         
         wandb.save('tunnickel/model.py')
         wandb.save('tunnickel/data.py')
