@@ -42,7 +42,7 @@ def create_model(model_name, num_features, num_classes, min_params, max_params, 
     assert params > min_params, f"Model has {params} but need at least {min_params}. Increase num of parameters in train.py to model."
     assert params < max_params, f"Model has {params} but max is {max_params}. Decrease num of parameters in train.py to model."
 
-    return model
+    return model, num_params
 
 
 def create_trainer(project_name, experiment_name, model_name, patience, max_epochs, gpus, enable_logging):
@@ -70,7 +70,7 @@ def train(project_name, experiment_name, model_name, test_users, max_epochs, tri
         num_features, num_classes, enable_logging, min_params, max_params, dropout, seed):    
 
     trainer = create_trainer(project_name, experiment_name, model_name, patience, max_epochs, gpus, enable_logging)
-    model = create_model(model_name, num_features, num_classes, min_params, max_params, dropout)
+    model, num_params = create_model(model_name, num_features, num_classes, min_params, max_params, dropout)
     
     mo = Module(model=model)
 
@@ -91,6 +91,7 @@ def train(project_name, experiment_name, model_name, test_users, max_epochs, tri
         wandb.config.num_classes = num_classes
         wandb.config.dropout = dropout
         wandb.config.seed = seed
+        wandb.config.num_params = num_params
         
         wandb.save('tunnickel/model.py')
         wandb.save('tunnickel/data.py')
