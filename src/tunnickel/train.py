@@ -11,13 +11,13 @@ import wandb
 from tunnickel.ode_rnn_rubanova import ODE_RNN_Rubanova
 from tunnickel.module import Module 
 
-def create_model(model_name, num_features, num_classes, min_params=140_000, max_params=160_000):
+def create_model(model_name, num_features, num_classes, min_params, max_params, dropout):
     if model_name == 'ANODE-LSTM':
         model = ANODE_LSTM(num_features=num_features, num_classes=num_classes, hidden_size=1024)
     elif model_name == 'S-ANODE-LSTM':
         model = S_ANODE_LSTM(num_features=num_features, num_classes=num_classes, hidden_size=1024)
     elif model_name == 'LSTM':
-        model = LSTM_Model(num_features=num_features, num_classes=num_classes, hidden_size=512)
+        model = LSTM_Model(num_features=num_features, num_classes=num_classes, hidden_size=512, dropout=dropout)
     elif model_name == 'Linear':
         model = Linear_Model(num_features=num_features, num_classes=num_classes, hidden_size=1596)
     elif model_name == 'ODE-RNN-Rubanova':
@@ -45,7 +45,7 @@ def create_model(model_name, num_features, num_classes, min_params=140_000, max_
     return model
 
 
-def create_trainer(project_name, model_name, patience, max_epochs, gpus, test_users, enable_logging):
+def create_trainer(project_name, experiment_name, model_name, patience, max_epochs, gpus, enable_logging):
     early_stop_callback = EarlyStopping(
         monitor='val_acc_epoch',
         patience=patience,
@@ -56,8 +56,7 @@ def create_trainer(project_name, model_name, patience, max_epochs, gpus, test_us
         monitor='val_acc_epoch',
         mode='max'
     )
-    experiment_name = ",".join(test_users)
-
+    
     if enable_logging:
         logger = WandbLogger(project=project_name, name=experiment_name, group=model_name)  
     else:
@@ -67,10 +66,11 @@ def create_trainer(project_name, model_name, patience, max_epochs, gpus, test_us
         callbacks=[early_stop_callback, checkpoint_callback])
     return trainer
     
-def train(project_name, model_name, test_users, max_epochs, trials_dir, batch_size, patience, gpus, num_workers, downsample_factor, usecols, 
-        num_features, num_classes, enable_logging, min_params, max_params):    
-    trainer = create_trainer(project_name, model_name, patience, max_epochs, gpus, test_users, enable_logging)
-    model = create_model(model_name, num_features, num_classes, min_params, max_params)
+def train(project_name, experiment_name, model_name, test_users, max_epochs, trials_dir, batch_size, patience, gpus, num_workers, downsample_factor, usecols, 
+        num_features, num_classes, enable_logging, min_params, max_params, dropout):    
+
+    trainer = create_trainer(project_name, experiment_name, model_name, patience, max_epochs, gpus, enable_logging)
+    model = create_model(model_name, num_features, num_classes, min_params, max_params, dropout)
     
     mo = Module(model=model)
 
@@ -83,6 +83,14 @@ def train(project_name, model_name, test_users, max_epochs, trials_dir, batch_si
 
     
     if enable_logging:
+        wandb.config.max_epochs = max_epochs
+        wandb.config.batch_size = batch_size
+        wandb.config.patience = patience
+        wandb.config.downsample_factor = downsample_factor
+        wandb.config.num_features = num_features
+        wandb.config.num_classes = num_classes
+        wandb.config.dropout = dropout
+        
         wandb.save('tunnickel/model.py')
         wandb.save('tunnickel/data.py')
         wandb.save('tunnickel/train.py')

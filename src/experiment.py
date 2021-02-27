@@ -11,8 +11,11 @@ from pytorch_lightning import seed_everything
 #KINEMATICS_USECOLS = [c-1 for c in [39, 40, 41, 51, 52, 53, 57,
 #                                    58, 59, 60, 70, 71, 72, 76]] # or None for all columns
 
+def create_experiment_name(test_users):
+    return ",".join(test_users)
+
 def main(project_name : str, model_name : str, seed, gpus, repeat, max_epochs, enable_logging,
-            min_params, max_params, batch_size, patience):
+            min_params, max_params, batch_size, patience, dropout):
     # sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
     seed_everything(seed)
 
@@ -26,12 +29,14 @@ def main(project_name : str, model_name : str, seed, gpus, repeat, max_epochs, e
         accuracies = []
         for _ in range(repeat):
             for user_out in USERS:
-                
-                results = train(project_name=project_name, model_name=model_name, test_users=[user_out], max_epochs=max_epochs, 
-                    trials_dir=trials_dir, batch_size=batch_size, patience=patience, 
-                    gpus=gpus, num_workers=NUM_WORKERS, downsample_factor=DOWNSAMPLE_FACTOR, usecols=KINEMATICS_USECOLS,
-                    num_features=NUM_FEATURES, num_classes=NUM_LABELS, enable_logging=enable_logging,
-                    min_params=min_params, max_params=max_params)
+                test_users = [user_out]
+
+                experiment_name = create_experiment_name(test_users)
+
+                results = train(project_name, experiment_name, model_name, test_users, max_epochs, 
+                    trials_dir, batch_size, patience, gpus, NUM_WORKERS, DOWNSAMPLE_FACTOR, KINEMATICS_USECOLS,
+                    NUM_FEATURES, NUM_LABELS, enable_logging, min_params, max_params, dropout)
+
                 acc = results[0]['test_acc_epoch']
                 accuracies.append(acc)
 
@@ -61,7 +66,11 @@ def create_parser():
     parser.add_argument('--project-name',
         default='TunNickel',         
         help='Project name for things like logging.'
-    )
+    )    
+    parser.add_argument('--dropout',
+        default=0.5,
+        type=float,
+        help='Dropout values for models that use it.')
     parser.add_argument('--max-epochs',
         default=500,
         type=int,
@@ -101,4 +110,4 @@ if __name__ == '__main__':
     parser = create_parser()
     a = parser.parse_args()
     main(a.project_name, a.model, a.seed, a.gpus, a.repeat, a.max_epochs, not a.disable_logging,
-        a.min_params, a.max_params, a.batch_size, a.patience)
+        a.min_params, a.max_params, a.batch_size, a.patience, a.dropout)

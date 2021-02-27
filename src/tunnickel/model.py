@@ -16,20 +16,16 @@ class LstmField(nn.Module):
 
 
 class LSTM_Model(nn.Module):
-    def __init__(self, num_features, num_classes, hidden_size):
+    def __init__(self, num_features, num_classes, hidden_size, dropout):
         super().__init__()
-        # self.nn1 = nn.Linear(num_features, int(hidden_size/2))
-        self.d1 = torch.nn.Dropout(0.5)        
-        self.lstm = nn.LSTM(input_size=num_features, hidden_size=hidden_size, batch_first=True, num_layers=2, dropout=0.4)
-        self.d2 = torch.nn.Dropout(0.5)
-        # self.penultimate = nn.Linear(hidden_size, int(hidden_size/2))
+        self.d1 = torch.nn.Dropout(dropout)        
+        self.lstm = nn.LSTM(input_size=num_features, hidden_size=hidden_size, batch_first=True, num_layers=2, dropout=dropout)
+        self.d2 = torch.nn.Dropout(dropout)
         self.final = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x):
-        # x = torch.relu(self.nn1(x))
         # x = self.d1(x)
         x, _ = self.lstm(x)
-        # x = torch.relu(self.penultimate(x))
         x = self.d2(x)
         x = self.final(x)
          
