@@ -12,12 +12,11 @@ from pytorch_lightning import seed_everything
 #                                    58, 59, 60, 70, 71, 72, 76]] # or None for all columns
 
 def main(project_name : str, model_name : str, seed, gpus, repeat, max_epochs, enable_logging,
-            min_params, max_params, batch_size):
+            min_params, max_params, batch_size, patience):
     # sets seeds for numpy, torch, python.random and PYTHONHASHSEED.
     seed_everything(seed)
 
-    KINEMATICS_USECOLS = None
-    PATIENCE = 500
+    KINEMATICS_USECOLS = None    
     NUM_WORKERS = 16
     DOWNSAMPLE_FACTOR = 6
     NUM_FEATURES = len(KINEMATICS_USECOLS) if KINEMATICS_USECOLS is not None else 76
@@ -29,7 +28,7 @@ def main(project_name : str, model_name : str, seed, gpus, repeat, max_epochs, e
             for user_out in USERS:
                 
                 results = train(project_name=project_name, model_name=model_name, test_users=[user_out], max_epochs=max_epochs, 
-                    trials_dir=trials_dir, batch_size=batch_size, patience=PATIENCE, 
+                    trials_dir=trials_dir, batch_size=batch_size, patience=patience, 
                     gpus=gpus, num_workers=NUM_WORKERS, downsample_factor=DOWNSAMPLE_FACTOR, usecols=KINEMATICS_USECOLS,
                     num_features=NUM_FEATURES, num_classes=NUM_LABELS, enable_logging=enable_logging,
                     min_params=min_params, max_params=max_params)
@@ -64,11 +63,15 @@ def create_parser():
         help='Project name for things like logging.'
     )
     parser.add_argument('--max-epochs',
-        default=10_000,
+        default=500,
         type=int,
         help='Max epochs to train for.')
+    parser.add_argument('--patience',
+        default=50,
+        type=int,
+        help='How long to wait for metric to improve before giving up on training.')        
     parser.add_argument('--batch-size',
-        default=32,
+        default=5,
         type=int,
         help='Training batch size.')        
     parser.add_argument('--repeat',
@@ -98,4 +101,4 @@ if __name__ == '__main__':
     parser = create_parser()
     a = parser.parse_args()
     main(a.project_name, a.model, a.seed, a.gpus, a.repeat, a.max_epochs, not a.disable_logging,
-        a.min_params, a.max_params, a.batch_size)
+        a.min_params, a.max_params, a.batch_size, a.patience)

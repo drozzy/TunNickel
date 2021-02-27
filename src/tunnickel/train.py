@@ -1,23 +1,15 @@
 # %%
-from tunnickel.model import Module
-from tunnickel.data import TrialsDataModule, USERS, NUM_LABELS
-import torch
-from pytorch_lightning import Trainer
-import torch.nn.functional as F
-from importlib import resources
-import torch
+from tunnickel.data import TrialsDataModule
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning import loggers as pl_loggers
-from tunnickel.model import LSTM2_NODE, CNN, S_ANODE_Linear, ANODE_Linear, NODE_Linear, Linear_Model, LSTM_Model, Module, S_NODE_CNN, S_ANODE_CNN, ANODE_CNN, NODE_CNN, NODE_LSTM, S_NODE_LSTM, S_ANODE_LSTM, ANODE_LSTM
+from tunnickel.model import LSTM2_NODE, CNN, S_ANODE_Linear, ANODE_Linear, NODE_Linear, Linear_Model, LSTM_Model, NODE_CNN, S_ANODE_LSTM, ANODE_LSTM
 from torchdyn.models import *
 from torchdyn import *
 from pytorch_lightning.loggers import WandbLogger
 import wandb 
 from tunnickel.ode_rnn_rubanova import ODE_RNN_Rubanova
-## print
- 
+from tunnickel.module import Module 
 
 def create_model(model_name, num_features, num_classes, min_params=140_000, max_params=160_000):
     if model_name == 'ANODE-LSTM':
@@ -45,6 +37,7 @@ def create_model(model_name, num_features, num_classes, min_params=140_000, max_
     else:
         raise ValueError("No such model exists: %s" % model_name)
     params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    
     print(f"Model parameters: {params}")
     assert params > min_params, f"Model has {params} but need at least {min_params}. Increase num of parameters in train.py to model."
     assert params < max_params, f"Model has {params} but max is {max_params}. Decrease num of parameters in train.py to model."
@@ -88,11 +81,11 @@ def train(project_name, model_name, test_users, max_epochs, trials_dir, batch_si
 
     result = trainer.test()
 
-    # Otherwise we keep writing to the same run!
+    
     if enable_logging:
         wandb.save('tunnickel/model.py')
         wandb.save('tunnickel/data.py')
         wandb.save('tunnickel/train.py')
-        wandb.finish()
+        wandb.finish()  # Otherwise we keep writing to the same run!
     return result
     # return result['test_acc']
