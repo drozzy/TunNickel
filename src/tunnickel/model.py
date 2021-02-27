@@ -25,13 +25,19 @@ class LstmField(nn.Module):
 class LSTM_Model(nn.Module):
     def __init__(self, num_features=76, num_classes=NUM_LABELS, hidden_size=32):
         super().__init__()
-        self.lstm = nn.LSTM(input_size=num_features, hidden_size=hidden_size, batch_first=True, num_layers=2, dropout=0.5)
+        self.nn1 = nn.Linear(num_features, num_features)
+        self.d1 = torch.nn.Dropout(0.5)        
+        self.lstm = nn.LSTM(input_size=num_features, hidden_size=hidden_size, batch_first=True, num_layers=2, dropout=0.4)
+        self.d2 = torch.nn.Dropout(0.5)
         # self.penultimate = nn.Linear(num_features, hidden_size)
         self.final = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x):
+        x = torch.relu(self.nn1(x))
+        x = self.d1(x)
         x, _ = self.lstm(x)
         # x = torch.relu(self.penultimate(x))
+        x = self.d2(x)
         x = self.final(x)
          
         return x
@@ -352,13 +358,14 @@ class S_ANODE_CNN(nn.Module):
         return x
 
 class Module(pl.LightningModule):
-    def __init__(self, model):
+    def __init__(self, model, lr=0.001):
         super().__init__()
         self.model = model
-
+        self.lr = lr
         self.accuracy_train = pl.metrics.Accuracy()
         self.accuracy_test = pl.metrics.Accuracy()
         self.accuracy_val = pl.metrics.Accuracy()
+        self.save_hyperparameters()
 
     def forward(self, x):
         y = self.model(x)
@@ -408,6 +415,5 @@ class Module(pl.LightningModule):
         return loss, pred, target_orig, lens
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters())
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)        
         return optimizer
-# %%
