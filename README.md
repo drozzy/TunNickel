@@ -15,13 +15,13 @@ Extension of the surgical data science course project.
 
 3. Create conda env from provided environment.yml:
 
-    conda env create -f environment.yml
-    conda activate surgical
+       conda env create -f environment.yml
+       conda activate surgical
 
 4. Run `experiment.py` from src dir:
 
-    cd src
-    python experiment.py -h
+       cd src
+       python experiment.py -h
     
 ## Vscode setup guide
 https://binx.io/blog/2020/03/05/setting-python-source-folders-vscode/
