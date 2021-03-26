@@ -40,6 +40,58 @@ class LSTM_Model(nn.Module):
         return x
 
 
+
+class LSTM_NODE(nn.Module):
+    """Good LSTM model followed by the NODE"""
+    def __init__(self, num_features, num_classes, hidden_size, dropout):
+        super().__init__()
+
+        self.d1 = torch.nn.Dropout(dropout)
+        self.lstm1 = nn.LSTM(input_size=num_features, hidden_size=int(hidden_size),batch_first=True,bidirectional=True,)
+        self.lstm2 = nn.LSTM(input_size=int(hidden_size*2), hidden_size=hidden_size, batch_first=True,bidirectional=True,)
+
+        self.field = nn.Linear(in_features=2*hidden_size, out_features=2*hidden_size)
+        self.neuralOde = NeuralODE(self.field)
+
+        self.final = nn.Linear(int(hidden_size*2), num_classes)
+
+    def forward(self, x):
+        x = self.d1(x)
+        x, _ = self.lstm1(x)
+        x = self.d1(x)
+        x, _ = self.lstm2(x)
+        x = self.d1(x)
+        x, _ = self.lstm2(x)
+        x = self.d1(x)
+
+        x = torch.relu(self.neuralOde(x))
+        x = self.final(x)
+         
+        return x
+
+class LSTM2_NODE(nn.Module):
+    """ LSTM2-NODE uses [x_t, h_{t-1}, h_t]  as input to NODE. """
+    def __init__(self, num_features, num_classes, hidden_size):
+        super().__init__()
+        self.lstm = nn.LSTM(input_size=num_features, hidden_size=hidden_size, batch_first=True)
+        self.func = nn.Linear(in_features=2*hidden_size+num_features, out_features=2*hidden_size+num_features)
+        self.neuralOde = NeuralODE(self.func)
+
+        self.penultimate = nn.Linear(hidden_size*2+num_features, hidden_size)
+        self.final = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        h, _ = self.lstm(x)
+        h_prev = torch.roll(h, shifts=1, dims=1)
+        x = torch.cat((x, h_prev, h), dim=2)
+        
+        x = self.neuralOde(x)
+        
+        x = torch.relu(self.penultimate(x))
+        x = self.final(x)
+         
+        return x
+        
 class Linear_Model(nn.Module):
     def __init__(self, num_features, num_classes, hidden_size):
         super().__init__()
@@ -70,28 +122,7 @@ class NODE_Linear(nn.Module):
          
         return x
 
-class LSTM2_NODE(nn.Module):
-    """ LSTM2-NODE uses [x_t, h_{t-1}, h_t]  as input to NODE. """
-    def __init__(self, num_features, num_classes, hidden_size):
-        super().__init__()
-        self.lstm = nn.LSTM(input_size=num_features, hidden_size=hidden_size, batch_first=True)
-        self.func = nn.Linear(in_features=2*hidden_size+num_features, out_features=2*hidden_size+num_features)
-        self.neuralOde = NeuralODE(self.func)
 
-        self.penultimate = nn.Linear(hidden_size*2+num_features, hidden_size)
-        self.final = nn.Linear(hidden_size, num_classes)
-
-    def forward(self, x):
-        h, _ = self.lstm(x)
-        h_prev = torch.roll(h, shifts=1, dims=1)
-        x = torch.cat((x, h_prev, h), dim=2)
-        
-        x = self.neuralOde(x)
-        
-        x = torch.relu(self.penultimate(x))
-        x = self.final(x)
-         
-        return x
 
 class ANODE_Linear(nn.Module):
     def __init__(self, num_features, num_classes, hidden_size):

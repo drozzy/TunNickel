@@ -3,7 +3,7 @@ from tunnickel.data import TrialsDataModule
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.callbacks import ModelCheckpoint
-from tunnickel.model import LSTM2_NODE, CNN, S_ANODE_Linear, ANODE_Linear, NODE_Linear, Linear_Model, LSTM_Model, NODE_CNN, S_ANODE_LSTM, ANODE_LSTM
+from tunnickel.model import LSTM_NODE, LSTM2_NODE, CNN, S_ANODE_Linear, ANODE_Linear, NODE_Linear, Linear_Model, LSTM_Model, NODE_CNN, S_ANODE_LSTM, ANODE_LSTM
 from torchdyn.models import *
 from torchdyn import *
 from pytorch_lightning.loggers import WandbLogger
@@ -18,6 +18,8 @@ def create_model(model_name, num_features, num_classes, min_params, max_params, 
         model = S_ANODE_LSTM(num_features=num_features, num_classes=num_classes, hidden_size=1024)
     elif model_name == 'LSTM':
         model = LSTM_Model(num_features=num_features, num_classes=num_classes, hidden_size=1024, dropout=dropout)
+    elif model_name == 'LSTM_NODE':
+        model = LSTM_NODE(num_features=num_features, num_classes=num_classes, hidden_size=1024, dropout=dropout)
     elif model_name == 'Linear':
         model = Linear_Model(num_features=num_features, num_classes=num_classes, hidden_size=1596)
     elif model_name == 'ODE-RNN-Rubanova':
